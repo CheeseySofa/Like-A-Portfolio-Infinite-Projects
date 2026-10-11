@@ -1,0 +1,770 @@
+/* =====================================================================
+   ABOUT PAGE  (loads after style.css, so it can override it)
+   Style reference: the "Check Jobs" screen - dark panels, gold highlight,
+   blue info box, big character in the middle, gold slash on the right.
+   ===================================================================== */
+
+body.about-page {
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    --gold: #f2c81c;
+    --gold-hi: #ffe45a;
+    --row-h: clamp(32px, 5.1vh, 44px);   /* height of each role row */
+}
+
+/* The faint dragon from the home page: slid right so it sits behind the character */
+body.about-page::before {
+    background-image: url('dragonfish.png');
+    width: 100vw;
+    height: 100vh;
+    left: 25%;
+    opacity: 0.12;
+}
+
+/* ---------- STAGE (everything behind the panels) ---------- */
+.stage {
+    position: fixed;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;      /* clicks go through to the panels */
+    overflow: hidden;
+    --aura: 85, 153, 255;      /* r, g, b - changes per role (see below) */
+}
+
+.stage[data-role="developer"] { --aura: 85, 153, 255; }
+.stage[data-role="drummer"]   { --aura: 170, 110, 255; }
+.stage[data-role="lifter"]    { --aura: 255, 70, 70; }
+.stage[data-role="hotwheels"] { --aura: 255, 150, 40; }
+
+/* Halftone dots, slowly drifting (like the dotted city in the reference) */
+.halftone {
+    position: absolute;
+    inset: -5%;
+    background-image: radial-gradient(circle, rgba(95, 214, 192, 0.55) 0 1.3px, transparent 1.9px);
+    background-size: 8px 8px;
+    opacity: 0.4;
+    -webkit-mask-image: radial-gradient(ellipse 34% 58% at 47% 56%, #000 0%, transparent 100%);
+            mask-image: radial-gradient(ellipse 34% 58% at 47% 56%, #000 0%, transparent 100%);
+    animation: dotsDrift 24s linear infinite;
+    transform: translate(calc(var(--px, 0) * 10px), calc(var(--py, 0) * 6px));
+}
+
+/* Glow behind the character - pulses slowly, colour follows the selected role */
+.aura {
+    position: absolute;
+    left: 47%;
+    top: 58%;
+    width: 78vh;
+    height: 78vh;
+    margin: -39vh 0 0 -39vh;
+    background: radial-gradient(circle,
+        rgba(var(--aura), 0.32) 0%,
+        rgba(var(--aura), 0.12) 40%,
+        transparent 68%);
+    animation: auraPulse 5s ease-in-out infinite;
+    transform: translate(calc(var(--px, 0) * -6px), calc(var(--py, 0) * -4px));
+}
+
+/* Black wedge on the right of the slash + the gold slash itself */
+.slash-shade {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.88) 32%);
+    clip-path: polygon(78.4% 0, 100% 0, 100% 100%, 66.4% 100%);
+}
+
+.slash {
+    position: absolute;
+    inset: 0;
+    filter: drop-shadow(0 0 9px rgba(255, 200, 0, 0.75));
+    transform: translate(calc(var(--px, 0) * 5px), 0);
+}
+
+.slash-line {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, #8a6a00 0%, var(--gold-hi) 30%, #fff3a8 50%, #ffd000 72%, #8a6a00 100%);
+    clip-path: polygon(78% 0, 78.45% 0, 66.85% 100%, 66.4% 100%);
+}
+
+/* a bright streak that runs up the slash every few seconds */
+.slash-line::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 0 42%, rgba(255, 255, 255, 0.95) 50%, transparent 58% 100%);
+    background-size: 100% 260%;
+    animation: slashSweep 4.2s ease-in-out infinite;
+}
+
+/* ---------- HERO (the character) ---------- */
+.hero {
+    position: absolute;
+    inset: 0 32% 40px 24%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    transform-origin: 50% 100%;
+    /* --px / --py (-0.5 .. 0.5) are set by about.js from the mouse position */
+    transform:
+        translate(calc(var(--px, 0) * -26px), calc(var(--py, 0) * -12px))
+        rotate(calc(var(--px, 0) * 1.6deg));
+}
+
+.hero-swap {
+    animation: heroIn 1s 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.hero-swap.punch {
+    animation: heroPunch 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.hero-img {
+    display: block;
+    height: min(90vh, 62vw);
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+    object-position: center bottom;
+    transform-origin: 50% 100%;
+    animation: breathe 4.6s ease-in-out infinite;
+    /* soft edges so a rectangular placeholder photo blends into the scene.
+       (A transparent PNG cutout looks best - the mask barely touches it.) */
+    -webkit-mask-image: radial-gradient(ellipse 62% 66% at 50% 46%, #000 55%, transparent 100%);
+            mask-image: radial-gradient(ellipse 62% 66% at 50% 46%, #000 55%, transparent 100%);
+    --tint: 0deg;
+    filter: drop-shadow(0 0 18px rgba(var(--aura), 0.35)) hue-rotate(var(--tint));
+    transition: filter 0.4s;
+}
+
+/* While the shared placeholder photo is showing, tint it per role so you can SEE the
+   role change. Once a role has its own image, this stops applying. */
+.stage[data-role="drummer"]   .hero-img.is-placeholder { --tint: 55deg; }
+.stage[data-role="lifter"]    .hero-img.is-placeholder { --tint: -40deg; }
+.stage[data-role="hotwheels"] .hero-img.is-placeholder { --tint: 170deg; }
+
+/* Colour flash when you switch roles */
+.flash {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 47% 58%, rgba(var(--aura), 0.6), transparent 52%);
+    opacity: 0;
+}
+
+.flash.go {
+    animation: flashGo 0.6s ease-out;
+}
+
+/* ---------- HEADER ---------- */
+.page-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 6;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 70px 12px 22px;
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.88) 78%, rgba(0, 0, 0, 0.6) 100%);
+    border-bottom: 3px solid var(--gold);
+    clip-path: polygon(0 0, 100% 0, calc(100% - 30px) 100%, 0 100%);
+    animation: slideInDown 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.header-icon {
+    width: 36px;
+    height: 36px;
+    fill: var(--gold);
+    filter: drop-shadow(0 0 6px rgba(255, 200, 0, 0.7));
+}
+
+.header-title {
+    font-family: 'Edo SZ', 'Impact', sans-serif;
+    font-size: clamp(1.7rem, 3.2vh + 0.6rem, 2.3rem);
+    font-weight: 400;
+    letter-spacing: 0.18rem;
+    line-height: 1;
+    color: #ffffff;
+    text-shadow: 3px 3px 6px #000, 0 0 18px rgba(255, 255, 255, 0.25);
+}
+
+.header-jp {
+    align-self: flex-end;
+    padding-bottom: 4px;
+    font-size: 0.85rem;
+    letter-spacing: 0.2rem;
+    color: rgba(255, 215, 0, 0.7);
+}
+
+/* ---------- LEFT COLUMN ---------- */
+.left-col {
+    position: fixed;
+    z-index: 6;
+    top: clamp(78px, 11vh, 98px);
+    bottom: clamp(48px, 7vh, 64px);
+    left: clamp(14px, 2vw, 36px);
+    width: clamp(292px, 21vw, 390px);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    animation: slideInLeft 0.7s 0.1s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.role-panel {
+    flex: 0 0 auto;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
+}
+
+.panel-head {
+    background: #f2f2f2;
+    color: #111;
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.04rem;
+    padding: 6px 12px;
+}
+
+.name-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: clamp(34px, 5.6vh, 46px);
+    background: linear-gradient(90deg, #000, #16161a);
+    border-bottom: 2px solid var(--gold);
+    overflow: hidden;
+}
+
+.name-thumb {
+    width: 72px;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 18%;
+}
+
+.name-text {
+    color: #ffffff;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.03rem;
+}
+
+.role-list {
+    list-style: none;
+    background: rgba(5, 5, 7, 0.88);
+    padding: 6px;
+}
+
+.role-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: var(--row-h);
+    margin-bottom: 4px;
+    padding: 0 14px 0 10px;
+    background: linear-gradient(90deg, #1c1c20, #0d0d0f);
+    border: 1px solid #2c2c32;
+    color: #f3f3f3;
+    cursor: pointer;
+    outline: none;
+    transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.role-row:last-child {
+    margin-bottom: 0;
+}
+
+.role-row:hover,
+.role-row:focus-visible {
+    background: linear-gradient(90deg, #2c2c34, #151519);
+    transform: translateX(4px);
+}
+
+.role-row:focus-visible {
+    box-shadow: 0 0 0 2px var(--gold);
+}
+
+.role-row.selected {
+    background: linear-gradient(180deg, var(--gold-hi) 0%, #f2b705 100%);
+    border-color: #fff0a0;
+    color: #111;
+    box-shadow: 0 0 20px rgba(255, 200, 0, 0.5);
+    transform: translateX(4px);
+}
+
+.role-icon {
+    width: 24px;
+    height: 24px;
+    flex: 0 0 24px;
+    color: var(--gold-hi);
+}
+
+.role-icon svg {
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.role-row.selected .role-icon {
+    color: #111;
+}
+
+.role-name {
+    flex: 1;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.role-rank {
+    font-size: 0.7rem;
+    color: #8d8d95;
+}
+
+.role-rank b {
+    margin-left: 4px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.role-row.selected .role-rank {
+    color: #5a4300;
+}
+
+.role-row.selected .role-rank b {
+    color: #111;
+}
+
+.role-new {
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.08rem;
+    color: var(--gold-hi);
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+}
+
+.role-row.selected .role-new {
+    color: #ffffff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
+}
+
+.role-row.locked {
+    color: #7d7d85;
+    cursor: not-allowed;
+}
+
+.role-row.locked .role-icon {
+    color: var(--gold);
+}
+
+.role-row.locked:hover {
+    transform: none;
+    background: linear-gradient(90deg, #1c1c20, #0d0d0f);
+}
+
+.role-row.locked.shake {
+    animation: shake 0.4s;
+}
+
+/* ---------- BLUE INFO PANEL ---------- */
+.info-panel {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 150px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: linear-gradient(145deg, #0b3fa8 0%, #0a62d8 55%, #0b4bbd 100%);
+    border: 2px solid #8fbaff;
+    box-shadow: 0 0 24px rgba(60, 120, 255, 0.35), 0 8px 30px rgba(0, 0, 0, 0.7);
+}
+
+/* big faint kanji watermark ("I / me") where the reference has the S shield */
+.info-panel::before {
+    content: '私';
+    position: absolute;
+    left: 6px;
+    bottom: -26px;
+    font-size: 9rem;
+    line-height: 1;
+    color: rgba(255, 255, 255, 0.07);
+    pointer-events: none;
+}
+
+.info-title {
+    position: relative;
+    padding: 6px 12px 6px 28px;
+    background: linear-gradient(90deg, rgba(0, 20, 90, 0.55), transparent);
+    color: var(--gold-hi);
+    font-size: 0.92rem;
+    font-weight: 700;
+}
+
+/* yellow slanted tick on the left of the title */
+.info-title::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    top: 6px;
+    width: 8px;
+    height: calc(100% - 12px);
+    background: var(--gold-hi);
+    transform: skewX(-20deg);
+}
+
+.info-stats {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 8px;
+    padding: 10px 10px 8px;
+}
+
+.stat {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    padding: 5px 8px;
+    border-radius: 3px;
+    background: rgba(0, 20, 90, 0.45);
+    color: #d4e4ff;
+    font-size: 0.72rem;
+}
+
+/* a maxed-out stat (5/5) is the role's defining trait */
+.stat.max {
+    background: rgba(255, 200, 0, 0.2);
+    box-shadow: inset 0 0 0 1px rgba(255, 228, 90, 0.75);
+    color: #ffffff;
+}
+
+.stat.max .stat-name {
+    color: var(--gold-hi);
+    font-weight: 700;
+}
+
+.stat-bar {
+    display: flex;
+    gap: 2px;
+}
+
+.seg {
+    display: block;
+    width: 11px;
+    height: 7px;
+    background: rgba(0, 0, 0, 0.45);
+    transform: skewX(-18deg);
+}
+
+.seg.on {
+    background: linear-gradient(180deg, var(--gold-hi), #f2b705);
+    animation: segIn 0.35s var(--d, 0ms) both;
+}
+
+.info-desc {
+    position: relative;
+    z-index: 1;
+    margin: auto 8px 8px;
+    padding: 8px 10px;
+    background: #f4f8ff;
+    border: 2px solid #7fb0ff;
+    color: #10203a;
+    font-size: 0.78rem;
+    line-height: 1.4;
+}
+
+.info-panel.ping {
+    animation: ping 0.45s ease-out;
+}
+
+.info-panel.ping .info-title,
+.info-panel.ping .info-desc {
+    animation: textIn 0.4s ease-out both;
+}
+
+/* ---------- RIGHT STATUS PANEL ---------- */
+.status-panel {
+    position: fixed;
+    z-index: 6;
+    right: clamp(20px, 3vw, 56px);
+    bottom: clamp(52px, 9vh, 80px);
+    width: clamp(270px, 20vw, 340px);
+    padding: 10px 14px 14px;
+    background: linear-gradient(180deg, rgba(14, 14, 18, 0.92), rgba(4, 4, 6, 0.92));
+    border-top: 3px solid var(--gold);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
+    animation: slideInRight 0.7s 0.25s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.status-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 4px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.06rem;
+    color: var(--gold-hi);
+}
+
+.status-class {
+    color: #ffffff;
+    letter-spacing: 0.02rem;
+}
+
+.status-list {
+    list-style: none;
+}
+
+.status-list li {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 7px 2px;
+    border-bottom: 1px solid #2a2a30;
+    animation: textIn 0.35s calc(var(--i, 0) * 60ms) ease-out both;
+}
+
+.s-label {
+    font-size: 0.8rem;
+    color: #b9b9c0;
+}
+
+.s-value {
+    font-family: 'Impact', 'Segoe UI', sans-serif;
+    font-size: 1.15rem;
+    letter-spacing: 0.04rem;
+    color: #ffffff;
+    text-shadow: 1px 1px 3px #000;
+}
+
+.s-value.s-small {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0;
+}
+
+.github-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 12px;
+    padding: 8px 12px;
+    border: 2px solid var(--gold);
+    background: rgba(242, 200, 28, 0.08);
+    color: #ffffff;
+    font-size: 0.8rem;
+    text-decoration: none;
+    transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+
+.github-btn b {
+    color: var(--gold-hi);
+    font-weight: 700;
+}
+
+.github-btn:hover,
+.github-btn:focus-visible {
+    background: rgba(242, 200, 28, 0.22);
+    box-shadow: 0 0 18px rgba(255, 200, 0, 0.5);
+    transform: translateY(-2px);
+    outline: none;
+}
+
+/* ---------- BOTTOM HINT BAR ---------- */
+.hint-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 6;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 30px;
+    padding: 0 5vw;
+    background: rgba(0, 0, 0, 0.94);
+    border-top: 1px solid #2a2a30;
+    font-size: 0.82rem;
+}
+
+.hint {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #e9e9ee;
+    text-decoration: none;
+}
+
+a.hint:hover,
+a.hint:focus-visible {
+    color: var(--gold-hi);
+    outline: none;
+}
+
+a.hint:hover kbd,
+a.hint:focus-visible kbd,
+a.hint.pressed kbd {
+    background: var(--gold-hi);
+    border-color: var(--gold-hi);
+    color: #111;
+}
+
+/* real, clickable key buttons (the arrows) */
+.key {
+    min-width: 28px;
+    padding: 2px 8px;
+    border: 1px solid #8d8d95;
+    border-radius: 3px;
+    background: #17171b;
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 0.82rem;
+    line-height: 1.2;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.1s;
+}
+
+.key:hover,
+.key:focus-visible {
+    border-color: var(--gold-hi);
+    color: var(--gold-hi);
+    outline: none;
+}
+
+.key:active,
+.key.pressed {
+    background: var(--gold-hi);
+    border-color: var(--gold-hi);
+    color: #111;
+    transform: translateY(2px);
+}
+
+kbd {
+    min-width: 24px;
+    padding: 1px 6px;
+    border: 1px solid #8d8d95;
+    border-radius: 3px;
+    background: #17171b;
+    font-family: inherit;
+    font-size: 0.72rem;
+    text-align: center;
+    color: #ffffff;
+}
+
+/* ---------- KEYFRAMES ---------- */
+@keyframes slideInDown  { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: none; } }
+@keyframes slideInLeft  { from { opacity: 0; transform: translateX(-50px); } to { opacity: 1; transform: none; } }
+@keyframes slideInRight { from { opacity: 0; transform: translateX(50px); }  to { opacity: 1; transform: none; } }
+
+/* character arrives once on load */
+@keyframes heroIn {
+    from { opacity: 0; transform: translateY(40px) scale(0.96); filter: brightness(2); }
+    to   { opacity: 1; transform: none; filter: none; }
+}
+
+/* character "punch-in" when you pick a role */
+@keyframes heroPunch {
+    0%   { opacity: 0.4; transform: translateX(-26px) scale(0.97); filter: brightness(2.2); }
+    55%  { opacity: 1;   transform: translateX(5px) scale(1.015);  filter: brightness(1.2); }
+    100% { opacity: 1;   transform: none;                          filter: none; }
+}
+
+/* idle: slow breathing from the feet up */
+@keyframes breathe {
+    0%, 100% { transform: scale(1, 1) translateY(0); }
+    50%      { transform: scale(1.012, 1.022) translateY(-4px); }
+}
+
+@keyframes auraPulse {
+    0%, 100% { opacity: 0.6;  transform: scale(1)    translate(calc(var(--px, 0) * -6px), calc(var(--py, 0) * -4px)); }
+    50%      { opacity: 1;    transform: scale(1.07) translate(calc(var(--px, 0) * -6px), calc(var(--py, 0) * -4px)); }
+}
+
+@keyframes dotsDrift {
+    to { background-position: 80px 40px; }   /* multiples of the 8px grid = seamless loop */
+}
+
+@keyframes slashSweep {
+    0%, 15% { background-position: 0 0; }
+    75%, 100% { background-position: 0 100%; }
+}
+
+@keyframes flashGo {
+    0%   { opacity: 0; }
+    20%  { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+@keyframes segIn {
+    from { opacity: 0; transform: skewX(-18deg) scaleX(0); }
+    to   { opacity: 1; transform: skewX(-18deg) scaleX(1); }
+}
+
+@keyframes ping {
+    0%   { box-shadow: 0 0 0 0 rgba(143, 186, 255, 0.9), 0 8px 30px rgba(0, 0, 0, 0.7); }
+    100% { box-shadow: 0 0 0 16px rgba(143, 186, 255, 0), 0 8px 30px rgba(0, 0, 0, 0.7); }
+}
+
+@keyframes textIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to   { opacity: 1; transform: none; }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-7px); }
+    40% { transform: translateX(7px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+}
+
+/* ---------- SMALLER SCREENS ---------- */
+@media (max-height: 720px) {
+    .info-desc { font-size: 0.72rem; }
+    .stat { padding: 3px 7px; }
+}
+
+@media (max-width: 1100px) {
+    .hero { inset: 0 24% 40px 30%; }
+    .hero-img { height: min(80vh, 70vw); }
+}
+
+@media (max-width: 900px) {
+    body.about-page { overflow-y: auto; padding-bottom: 60px; }
+
+    .page-header { position: relative; }
+
+    .left-col,
+    .status-panel {
+        position: relative;
+        inset: auto;
+        width: min(430px, 92vw);
+        margin: 14px auto;
+    }
+
+    .left-col { height: auto; }
+    .info-panel { min-height: 240px; }
+
+    /* character becomes a dim backdrop behind the stacked panels */
+    .hero { inset: 0; opacity: 0.35; }
+    .hero-img { height: 80vh; }
+    .slash-shade, .slash { display: none; }
+}
+
+/* ---------- RESPECT "REDUCE MOTION" ---------- */
+@media (prefers-reduced-motion: reduce) {
+    .halftone, .aura, .slash-line::after, .hero-img,
+    .hero-swap, .hero-swap.punch, .flash.go {
+        animation: none;
+    }
+    .hero { transform: none; }
+}

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Like A Portfolio: Infinite Projects</title>
+    <!-- style.css = shared look (Edo SZ font, fog, sparks, dragon). start.css = this screen only -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="start.css">
+    <!-- start loading the home page now so the hand-off feels instant -->
+    <link rel="prefetch" href="index.html">
+</head>
+<body class="start-page" data-stage="logo">
+    <!-- Shared background effects (same as the home page) -->
+    <div class="bg-rays"></div>
+    <div class="bg-pattern"></div>
+
+    <div class="fog-container">
+        <div class="fog fog-1"></div>
+        <div class="fog fog-2"></div>
+        <div class="fog fog-3"></div>
+        <div class="fog fog-4"></div>
+        <div class="fog fog-5"></div>
+    </div>
+
+    <div class="sparks-container">
+        <div class="spark spark-1"></div>
+        <div class="spark spark-2"></div>
+        <div class="spark spark-3"></div>
+        <div class="spark spark-4"></div>
+        <div class="spark spark-5"></div>
+        <div class="spark spark-6"></div>
+        <div class="spark spark-7"></div>
+        <div class="spark spark-8"></div>
+    </div>
+
+    <main class="screen" id="screen">
+        <div class="vignette"></div>
+
+        <!-- 1. LOGO CARD (like the studio logos before a game's title screen) -->
+        <section class="intro-card" aria-hidden="true">
+            <p class="by">CheeseSofa</p>
+            <p class="pres">PRESENTS</p>
+        </section>
+
+        <!-- 2. THE TITLE (drops in after the card) -->
+        <section class="logo-block">
+            <div class="logo-float">
+                <div class="kanji-wrap"><span class="st-kanji">龍</span></div>
+                <h1 class="st-title">
+                    <span class="st-like">LIKE <b>A</b></span>
+                    <span class="st-portfolio">PORTFOLIO:</span>
+                    <span class="st-sub">
+                        <span>INFINITE</span>
+                        <span>PROJECTS</span>
+                    </span>
+                </h1>
+                <div class="st-rule"></div>
+            </div>
+        </section>
+
+        <!-- 3. PRESS ANY BUTTON -->
+        <p class="prompt" id="prompt">PRESS ANY BUTTON</p>
+
+        <footer class="legal">&copy; 2026 Yajnesh_fr</footer>
+
+        <button class="sound-btn" id="soundBtn" type="button" aria-pressed="false">&#9834; SOUND OFF</button>
+    </main>
+
+    <!-- effects that sit on top of everything -->
+    <div class="shockwave" id="shockwave"></div>
+    <div class="flash" id="flash"></div>
+    <div class="curtain" id="curtain"></div>
+
+    <!-- PLACEHOLDER MUSIC: swap the file in start.js (MUSIC.src), not here -->
+    <audio id="bgm" preload="auto"></audio>
+
+    <script src="start.js"></script>
+</body>
+</html>

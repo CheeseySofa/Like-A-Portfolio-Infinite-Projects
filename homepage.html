@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Like A Portfolio: Infinite Projects</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Animated background elements -->
+    <div class="bg-rays"></div>
+    <div class="bg-pattern"></div>
+
+    <!-- Subtle fog at the very bottom -->
+    <div class="fog-container">
+        <div class="fog fog-1"></div>
+        <div class="fog fog-2"></div>
+        <div class="fog fog-3"></div>
+        <div class="fog fog-4"></div>
+        <div class="fog fog-5"></div>
+    </div>
+
+    <!-- Sparks from top -->
+    <div class="sparks-container">
+        <div class="spark spark-1"></div>
+        <div class="spark spark-2"></div>
+        <div class="spark spark-3"></div>
+        <div class="spark spark-4"></div>
+        <div class="spark spark-5"></div>
+        <div class="spark spark-6"></div>
+        <div class="spark spark-7"></div>
+        <div class="spark spark-8"></div>
+    </div>
+
+    <!-- Title at top center with kanji above -->
+    <div class="game-title">
+        <div class="title-kanji">龍</div>
+        <div class="title-main">
+            <div class="title-like-line">LIKE <span class="red-a">A</span></div>
+            <span class="title-portfolio">PORTFOLIO:</span>
+        </div>
+        <div class="title-subtitle">
+            <span class="title-infinite">INFINITE</span>
+            <span class="title-projects">PROJECTS</span>
+        </div>
+    </div>
+
+    <!-- Character Section - Bottom Right with HP above and MP below -->
+    <div class="character-section">
+        <!-- Star containing image with HP above and MP below -->
+        <div class="character-star-frame">
+            <!-- HP section - lower half of star -->
+            <div class="hp-section">
+                <div class="hp-value">1000</div>
+                <div class="hp-bar">
+                    <div class="hp-fill"></div>
+                </div>
+            </div>
+
+            <!-- Black star with yellow glow -->
+            <div class="star-bg">★</div>
+
+            <!-- Level tag -->
+            <div class="level-badge"><span class="lv">Lv.</span><span class="lv-num">14</span></div>
+
+            <!-- Character image at center of star -->
+            <div class="portrait">
+                <img src="thegoat.png" alt="Character" class="character-image">
+            </div>
+
+            <!-- MP section - under HP -->
+            <div class="mp-section">
+                <div class="mp-value">420</div>
+                <div class="mp-bar">
+                    <div class="mp-fill"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Diamond Menu Buttons - Bottom Left -->
+    <nav class="menu-buttons">
+        <div class="diamond-grid">
+            <!-- Top -->
+            <div class="diamond-btn-wrapper top">
+                <button class="diamond-btn" data-page="projects">
+                    <div class="diamond-shape"></div>
+                    <div class="btn-content">
+                        <span class="btn-text-en">PROJECTS</span>
+                        <span class="btn-text-jp">プロジェクト</span>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Left -->
+            <div class="diamond-btn-wrapper left">
+                <button class="diamond-btn" data-page="contact">
+                    <div class="diamond-shape"></div>
+                    <div class="btn-content">
+                        <span class="btn-text-en">CONTACT</span>
+                        <span class="btn-text-jp">連絡</span>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Right -->
+            <div class="diamond-btn-wrapper right">
+                <button class="diamond-btn" data-page="skills">
+                    <div class="diamond-shape"></div>
+                    <div class="btn-content">
+                        <span class="btn-text-en">SKILLS</span>
+                        <span class="btn-text-jp">スキル</span>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Bottom -->
+            <div class="diamond-btn-wrapper bottom">
+                <button class="diamond-btn" data-page="about">
+                    <div class="diamond-shape"></div>
+                    <div class="btn-content">
+                        <span class="btn-text-en">ABOUT</span>
+                        <span class="btn-text-jp">について</span>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <script src="script.js"></script>
+    <script src="nav.js"></script>
+</body>
+</html>

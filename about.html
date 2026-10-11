@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About | Like A Portfolio: Infinite Projects</title>
+    <!-- style.css = shared look (fonts, fog, sparks, dragon). about.css = this page only -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="about.css">
+</head>
+<body class="about-page">
+    <!-- Shared background effects (same as the home page) -->
+    <div class="bg-rays"></div>
+    <div class="bg-pattern"></div>
+
+    <div class="fog-container">
+        <div class="fog fog-1"></div>
+        <div class="fog fog-2"></div>
+        <div class="fog fog-3"></div>
+        <div class="fog fog-4"></div>
+        <div class="fog fog-5"></div>
+    </div>
+
+    <div class="sparks-container">
+        <div class="spark spark-1"></div>
+        <div class="spark spark-2"></div>
+        <div class="spark spark-3"></div>
+        <div class="spark spark-4"></div>
+        <div class="spark spark-5"></div>
+        <div class="spark spark-6"></div>
+        <div class="spark spark-7"></div>
+        <div class="spark spark-8"></div>
+    </div>
+
+    <!-- STAGE: everything behind the panels (halftone, aura, slash, character) -->
+    <div class="stage" id="stage" data-role="developer">
+        <div class="halftone"></div>
+        <div class="aura"></div>
+        <div class="slash-shade"></div>
+        <div class="slash"><div class="slash-line"></div></div>
+
+        <!-- hero > hero-swap > img : three layers so mouse-parallax, the role-swap
+             animation and the idle breathing never fight over the same transform -->
+        <div class="hero" id="hero">
+            <div class="hero-swap" id="heroSwap">
+                <img class="hero-img" id="heroImg" src="placeholder-character.jpg" alt="Character">
+            </div>
+        </div>
+
+        <div class="flash" id="flash"></div>
+    </div>
+
+    <!-- HEADER (top-left banner) -->
+    <header class="page-header">
+        <svg class="header-icon" viewBox="0 0 100 100" aria-hidden="true">
+            <polygon points="36.35,6.82 58.36,29.15 88.27,19.76 73.83,47.59 92,73.14 61.07,68.01 42.39,93.18 37.71,62.18 8,52.19 36.03,38.17"/>
+        </svg>
+        <h1 class="header-title">About Me</h1>
+        <span class="header-jp">について</span>
+    </header>
+
+    <!-- LEFT COLUMN: role list + info panel -->
+    <aside class="left-col">
+        <section class="role-panel">
+            <div class="panel-head">Role List</div>
+
+            <div class="name-bar">
+                <img class="name-thumb" id="nameThumb" src="placeholder-character.jpg" alt="">
+                <span class="name-text">Yajnesh Skandhan J.G</span>
+            </div>
+
+            <ul class="role-list" id="roleList" role="listbox" aria-label="Roles">
+                <li class="role-row selected" data-role="developer" role="option" aria-selected="true" tabindex="0">
+                    <span class="role-icon"><svg viewBox="0 0 24 24"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></svg></span>
+                    <span class="role-name">Developer</span>
+                    <span class="role-rank"><small>Rank</small> <b>7</b></span>
+                </li>
+
+                <li class="role-row" data-role="drummer" role="option" aria-selected="false" tabindex="0">
+                    <span class="role-icon"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="10" rx="8" ry="3"/><path d="M4 10v7c0 1.7 3.6 3 8 3s8-1.3 8-3v-7"/><path d="M7 2l5 6M17 2l-5 6"/></svg></span>
+                    <span class="role-name">Drummer</span>
+                    <span class="role-rank"><small>Rank</small> <b>3</b></span>
+                </li>
+
+                <li class="role-row" data-role="lifter" role="option" aria-selected="false" tabindex="0">
+                    <span class="role-icon"><svg viewBox="0 0 24 24"><path d="M6 7v10M3 10v4M18 7v10M21 10v4M6 12h12"/></svg></span>
+                    <span class="role-name">Lifter</span>
+                    <span class="role-rank"><small>Rank</small> <b>1</b></span>
+                </li>
+
+                <li class="role-row" data-role="hotwheels" role="option" aria-selected="false" tabindex="0">
+                    <span class="role-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.6"/><path d="M12 3v6.4M12 14.6V21M3 12h6.4M14.6 12H21"/></svg></span>
+                    <span class="role-name">Hot Wheels Enthusiast</span>
+                    <span class="role-rank"><small>Rank</small> <b>13</b></span>
+                </li>
+
+                <!-- Locked rows: room to grow. Clicking one just shakes it. -->
+                <li class="role-row locked" aria-disabled="true" title="Not unlocked yet">
+                    <span class="role-icon"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="1"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span>
+                    <span class="role-name">???</span>
+                </li>
+                <li class="role-row locked" aria-disabled="true" title="Not unlocked yet">
+                    <span class="role-icon"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="1"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span>
+                    <span class="role-name">???</span>
+                </li>
+            </ul>
+        </section>
+
+        <!-- Blue info panel: filled in by about.js when you pick a role -->
+        <section class="info-panel" id="infoPanel">
+            <div class="info-title" id="infoTitle"></div>
+            <div class="info-stats" id="infoStats"></div>
+            <p class="info-desc" id="infoDesc"></p>
+        </section>
+    </aside>
+
+    <!-- RIGHT: status panel -->
+    <aside class="status-panel">
+        <div class="status-head"><span>Status</span><span class="status-class" id="statusClass"></span></div>
+        <ul class="status-list" id="statusList"></ul>
+        <a class="github-btn" href="https://www.instagram.com/yajnesh_fr/" target="_blank" rel="noopener">
+            <span>Instagram</span>
+            <b>yajnesh_fr</b>
+        </a>
+    </aside>
+
+    <!-- BOTTOM HINT BAR -->
+    <footer class="hint-bar">
+        <span class="hint">
+            <button class="key" id="keyUp" type="button" aria-label="Previous role">&uarr;</button>
+            <button class="key" id="keyDown" type="button" aria-label="Next role">&darr;</button>
+            Switch Role
+        </span>
+        <a class="hint" id="backBtn" href="homepage.html"><kbd>Q</kbd> Back</a>
+    </footer>
+
+    <script src="about.js"></script>
+</body>
+</html>

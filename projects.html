@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projects | Like A Portfolio: Infinite Projects</title>
+    <!-- style.css = shared look (fonts, fog, sparks, dragon). projects.css = this page only -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="projects.css">
+</head>
+<body class="projects-page">
+    <!-- yen notes and coins falling behind everything (money-rain.js) -->
+    <canvas id="moneyRain" class="money-rain" aria-hidden="true"></canvas>
+
+    <!-- Shared background effects (same as the other pages) -->
+    <div class="bg-rays"></div>
+    <div class="bg-pattern"></div>
+
+    <div class="fog-container">
+        <div class="fog fog-1"></div>
+        <div class="fog fog-2"></div>
+        <div class="fog fog-3"></div>
+        <div class="fog fog-4"></div>
+        <div class="fog fog-5"></div>
+    </div>
+
+    <div class="sparks-container">
+        <div class="spark spark-1"></div>
+        <div class="spark spark-2"></div>
+        <div class="spark spark-3"></div>
+        <div class="spark spark-4"></div>
+        <div class="spark spark-5"></div>
+        <div class="spark spark-6"></div>
+        <div class="spark spark-7"></div>
+        <div class="spark spark-8"></div>
+    </div>
+
+    <!-- HEADER (top-left banner) -->
+    <header class="page-header">
+        <svg class="header-icon" viewBox="0 0 100 100" aria-hidden="true">
+            <polygon points="36.35,6.82 58.36,29.15 88.27,19.76 73.83,47.59 92,73.14 61.07,68.01 42.39,93.18 37.71,62.18 8,52.19 36.03,38.17"/>
+        </svg>
+        <h1 class="header-title">Projects</h1>
+        <span class="header-jp">プロジェクト</span>
+    </header>
+
+    <!-- Top-right: where the reference shows "Money". Here: how many repositories, plus total stars. -->
+    <div class="topright" id="topRight">
+        <div class="topright-main">
+            <span class="topright-label">Repositories</span>
+            <span class="topright-value" id="statRepos">&ndash;</span>
+        </div>
+        <div class="topright-sub" id="statSub">&nbsp;</div>
+    </div>
+
+    <main class="layout">
+        <!-- LEFT: the skill-tree wheel. Every repository is a gem on it. -->
+        <section class="wheel-wrap" aria-label="Repositories">
+            <svg id="wheel" class="wheel" viewBox="0 0 600 600" role="listbox" aria-label="Repository wheel">
+                <defs>
+                    <!-- brass: the bezel, pins and gem rims -->
+                    <linearGradient id="brass" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stop-color="#fff0a6"/>
+                        <stop offset="28%" stop-color="#e2b93b"/>
+                        <stop offset="55%" stop-color="#8f6a14"/>
+                        <stop offset="78%" stop-color="#d9b04a"/>
+                        <stop offset="100%" stop-color="#6e4e0c"/>
+                    </linearGradient>
+                    <!-- ring brass: shaded across the band so it looks like a round tube, the same all the way round -->
+                    <radialGradient id="ringBrass" gradientUnits="userSpaceOnUse" cx="300" cy="300" r="296">
+                        <stop offset="0.915" stop-color="#6e4e0c"/>
+                        <stop offset="0.935" stop-color="#d9ae3a"/>
+                        <stop offset="0.962" stop-color="#fff0a6"/>
+                        <stop offset="0.985" stop-color="#cf9f2c"/>
+                        <stop offset="1" stop-color="#6a4a0a"/>
+                    </radialGradient>
+                    <!-- the board inside the ring: dark charcoal with a faint diagonal pattern (Yakuza 0) -->
+                    <pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                        <rect width="7" height="7" fill="#12171d"/>
+                        <path d="M0 0H7M0 0V7" stroke="#2c3643" stroke-width="1.5"/>
+                    </pattern>
+                    <radialGradient id="disc" cx="50%" cy="50%" r="55%">
+                        <stop offset="0%" stop-color="#26303b"/>
+                        <stop offset="70%" stop-color="#131921"/>
+                        <stop offset="100%" stop-color="#0b0f14"/>
+                    </radialGradient>
+                    <radialGradient id="gloss" cx="35%" cy="28%" r="70%">
+                        <stop offset="0%" stop-color="#ffffff" stop-opacity="0.85"/>
+                        <stop offset="45%" stop-color="#ffffff" stop-opacity="0.12"/>
+                        <stop offset="100%" stop-color="#000000" stop-opacity="0.35"/>
+                    </radialGradient>
+                    <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+                        <feGaussianBlur stdDeviation="4" result="b"/>
+                        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+                    </filter>
+                    <clipPath id="hubClip"><circle cx="300" cy="300" r="33"/></clipPath>
+                </defs>
+
+                <!-- the pachinko ring: brass bezel (bulbs are added by projects.js). Inside it is the plain Yakuza 0 board. -->
+                <circle cx="300" cy="300" r="299" fill="#0d0a04"/>
+                <circle cx="300" cy="300" r="296" fill="url(#ringBrass)"/>
+                <circle cx="300" cy="300" r="296" fill="none" stroke="#2a1c04" stroke-width="1.5"/>
+                <!-- inner lip + the board -->
+                <circle cx="300" cy="300" r="272.5" fill="#150f03"/>
+                <circle cx="300" cy="300" r="271" fill="none" stroke="#f3dc8a" stroke-opacity="0.75" stroke-width="1.2"/>
+                <circle cx="300" cy="300" r="269" fill="url(#disc)"/>
+                <circle cx="300" cy="300" r="269" fill="url(#hatch)" opacity="0.38"/>
+                <circle cx="300" cy="300" r="269" fill="none" stroke="#000" stroke-opacity="0.6" stroke-width="6"/>
+                <g id="rails"></g>
+                <g id="links"></g>
+                <g id="nodes"></g>
+
+                <!-- the hub in the middle: the GitHub profile -->
+                <g id="hub" class="hub" tabindex="0" role="option" aria-label="Profile">
+                    <circle cx="300" cy="300" r="45" fill="url(#brass)" stroke="#2a1c04" stroke-width="1.5"/>
+                    <circle cx="300" cy="300" r="39" fill="#1a1204"/>
+                    <circle cx="300" cy="300" r="33" fill="#13335f"/>
+                    <image id="hubImage" href="" x="267" y="267" width="66" height="66" preserveAspectRatio="xMidYMid slice" clip-path="url(#hubClip)"/>
+                    <circle cx="300" cy="300" r="33" fill="none" stroke="#e2b93b" stroke-opacity="0.8" stroke-width="1.5"/>
+                </g>
+            </svg>
+            <div class="wheel-tip" id="wheelTip" role="tooltip"></div>
+        </section>
+
+        <!-- RIGHT: detail panel (image, name, description, price line) -->
+        <section class="detail" id="detail" aria-live="polite">
+            <div class="rule rule-top"></div>
+
+            <div class="detail-body" id="detailBody">
+                <!-- the preview image (first image from the README) -->
+                <div class="shot" id="shot">
+                    <div class="shot-fallback" id="shotFallback"><span id="shotInitial">?</span></div>
+                    <img class="shot-img" id="shotImg" alt="" hidden>
+                    <div class="shot-activity" title="How recently this repo was pushed to">
+                        <i id="activityFill"></i>
+                    </div>
+                    <div class="chips" id="chips"></div>
+                    <div class="shot-note" id="shotNote"></div>
+                </div>
+
+                <h2 class="detail-title" id="detailTitle">Loading&hellip;</h2>
+
+                <div class="detail-text" id="detailText"></div>
+                <p class="detail-meta" id="detailMeta"></p>
+
+                <!-- full README view (toggled with the Details button) -->
+                <div class="readme" id="readme" hidden>
+                    <div class="readme-scroll" id="readmeScroll"></div>
+                </div>
+            </div>
+
+            <div class="detail-foot">
+                <div class="rule"></div>
+                <div class="price-row">
+                    <a class="open-btn" id="openBtn" href="#" target="_blank" rel="noopener">Open on GitHub &#9656;</a>
+                    <span class="price" id="price"></span>
+                </div>
+            </div>
+            <div class="rule rule-bottom"></div>
+        </section>
+    </main>
+
+    <!-- BOTTOM BAR -->
+    <footer class="hint-bar">
+        <button class="hint-btn" id="btnDetails" type="button" aria-pressed="false">
+            <kbd class="key" aria-hidden="true">D</kbd> Details
+        </button>
+        <span class="crumb">Projects</span>
+        <a class="crumb crumb-link" id="crumbUser" href="#" target="_blank" rel="noopener">github.com</a>
+
+        <span class="spacer"></span>
+
+        <span class="hint">
+            <button class="key" id="keyLeft" type="button" aria-label="Previous gem">&larr;</button>
+            <button class="key" id="keyRight" type="button" aria-label="Next gem">&rarr;</button>
+            Rotate
+        </span>
+        <span class="hint">
+            <button class="key" id="keyUp" type="button" aria-label="Inner ring">&uarr;</button>
+            <button class="key" id="keyDown" type="button" aria-label="Outer ring">&darr;</button>
+            Ring
+        </span>
+        <span class="hint"><kbd class="key key-wide" aria-hidden="true">Enter</kbd> Open</span>
+        <a class="hint back" id="backBtn" href="homepage.html"><kbd class="key key-wide" aria-hidden="true">Esc</kbd> Back</a>
+    </footer>
+
+    <script src="money-rain.js"></script>
+    <script src="projects.js"></script>
+</body>
+</html>

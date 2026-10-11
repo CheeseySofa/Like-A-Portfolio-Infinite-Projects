@@ -1,0 +1,828 @@
+@font-face {
+    font-family: 'Edo SZ';
+    src: url('edosz.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Impact', sans-serif;
+    background: #000000;
+    min-height: 100vh;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Dragon background - moved down */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-image: url('dragonfish.jpg');
+    background-size: cover; /* Ensures it fills the screen without squishing */
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.40;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* Background Effects */
+.bg-rays {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background:
+        radial-gradient(ellipse at 30% 40%, rgba(255, 215, 0, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 70% 60%, rgba(218, 165, 32, 0.06) 0%, transparent 50%);
+    animation: subtleGlow 6s ease-in-out infinite;
+    z-index: 0;
+}
+
+@keyframes subtleGlow {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.7; }
+}
+
+.bg-pattern {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image:
+        repeating-linear-gradient(
+            0deg,
+            rgba(255, 215, 0, 0.02) 0px,
+            transparent 2px,
+            transparent 80px
+        );
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Thicker fog at the very bottom */
+.fog-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 180px;
+    pointer-events: none;
+    z-index: 2;
+    overflow: visible;
+}
+
+.fog {
+    position: absolute;
+    bottom: 0;
+    width: 500px;
+    height: 240px;
+    background: radial-gradient(ellipse at center bottom, rgba(200, 200, 200, 0.36) 0%, rgba(180, 180, 180, 0.22) 40%, transparent 72%);
+    border-radius: 50%;
+    filter: blur(50px);
+    animation: fogFloat 12s ease-in-out infinite;
+}
+
+.fog-1 {
+    left: 5%;
+    animation-delay: 0s;
+    width: 550px;
+}
+
+.fog-2 {
+    left: 25%;
+    animation-delay: 2s;
+    width: 500px;
+}
+
+.fog-3 {
+    left: 50%;
+    transform: translateX(-50%);
+    animation-delay: 1s;
+    width: 600px;
+}
+
+.fog-4 {
+    right: 25%;
+    animation-delay: 3s;
+    width: 520px;
+}
+
+.fog-5 {
+    right: 5%;
+    animation-delay: 1.5s;
+    width: 540px;
+}
+
+@keyframes fogFloat {
+    0%, 100% {
+        transform: translateX(0) translateY(0) scale(1);
+        opacity: 0.75;
+    }
+    50% {
+        transform: translateX(20px) translateY(-10px) scale(1.05);
+        opacity: 0.95;
+    }
+}
+
+/* Sparks from top */
+.sparks-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 3;
+    overflow: hidden;
+}
+
+.spark {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: #FFD700;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #FFD700, 0 0 12px #FFD700;
+    animation: sparkFall 4s linear infinite;
+    opacity: 0;
+}
+
+.spark-1 { left: 10%; animation-delay: 0s; }
+.spark-2 { left: 25%; animation-delay: 0.5s; }
+.spark-3 { left: 40%; animation-delay: 1s; }
+.spark-4 { left: 55%; animation-delay: 1.5s; }
+.spark-5 { left: 70%; animation-delay: 0.8s; }
+.spark-6 { left: 85%; animation-delay: 1.2s; }
+.spark-7 { left: 15%; animation-delay: 2s; }
+.spark-8 { left: 90%; animation-delay: 2.5s; }
+
+@keyframes sparkFall {
+    0% {
+        top: -20px;
+        opacity: 1;
+        transform: translateX(0);
+    }
+    100% {
+        top: 100%;
+        opacity: 0;
+        transform: translateX(30px);
+    }
+}
+
+/* Title - Top Center - Smaller size */
+.game-title {
+    position: fixed;
+    top: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.title-kanji {
+    font-family: 'Edo SZ', 'Impact', sans-serif;
+    font-size: 4.5rem;
+    color: rgba(240, 248, 255, 0.24);
+    text-shadow:
+        0 0 10px rgba(220, 235, 255, 0.5),
+        0 0 28px rgba(200, 225, 255, 0.35),
+        0 0 60px rgba(180, 210, 255, 0.2);
+    font-weight: 900;
+    margin-bottom: -0.8rem;
+    line-height: 1;
+    animation: tubeFlicker 7s linear infinite;
+}
+
+/* Faint fluorescent-tube flicker: steady glow with a few quick stutters per cycle */
+@keyframes tubeFlicker {
+    0%, 30%, 32%, 36%, 68%, 70%, 72%, 100% {
+        color: rgba(240, 248, 255, 0.24);
+        text-shadow:
+            0 0 10px rgba(220, 235, 255, 0.5),
+            0 0 28px rgba(200, 225, 255, 0.35),
+            0 0 60px rgba(180, 210, 255, 0.2);
+    }
+    31%, 33%, 69% {
+        color: rgba(240, 248, 255, 0.08);
+        text-shadow:
+            0 0 3px rgba(220, 235, 255, 0.1),
+            0 0 8px rgba(200, 225, 255, 0.05),
+            0 0 16px rgba(180, 210, 255, 0.03);
+    }
+    34%, 71% {
+        color: rgba(240, 248, 255, 0.16);
+        text-shadow:
+            0 0 6px rgba(220, 235, 255, 0.3),
+            0 0 16px rgba(200, 225, 255, 0.2),
+            0 0 32px rgba(180, 210, 255, 0.1);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .title-kanji {
+        animation: none;
+    }
+}
+
+.title-main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+}
+
+.title-like-line {
+    font-family: 'Edo SZ', 'Impact', sans-serif;
+    font-size: 2rem;
+    font-weight: 400;
+    color: #ffffff;
+    letter-spacing: 0.3rem;
+    text-shadow:
+        3px 3px 6px rgba(0, 0, 0, 1),
+        0 0 20px rgba(255, 255, 255, 0.3);
+    text-transform: uppercase;
+    line-height: 1;
+}
+
+/* The "A" in "LIKE A" - RED and BIGGER */
+.title-like-line .red-a {
+    color: #ff3333;
+    font-size: 2.8rem;
+    text-shadow:
+        3px 3px 6px rgba(0, 0, 0, 1),
+        0 0 20px rgba(255, 51, 51, 0.6);
+    font-weight: 900;
+}
+
+.title-portfolio {
+    font-family: 'Edo SZ', 'Impact', sans-serif;
+    font-size: 3rem;
+    font-weight: 400;
+    color: #ffffff;
+    letter-spacing: 0.35rem;
+    text-shadow:
+        4px 4px 8px rgba(0, 0, 0, 1),
+        0 0 25px rgba(255, 255, 255, 0.3);
+    text-transform: uppercase;
+    line-height: 0.85;
+    margin-top: -0.2rem;
+}
+
+.title-subtitle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 0.3rem;
+    position: relative;
+    z-index: 1;
+}
+
+/* INFINITE PROJECTS in yellow */
+.title-infinite,
+.title-projects {
+    font-family: 'Edo SZ', 'Impact', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 400;
+    color: #FFD700;
+    letter-spacing: 0.4rem;
+    text-shadow:
+        4px 4px 8px rgba(0, 0, 0, 1),
+        0 0 25px rgba(255, 215, 0, 0.5);
+    text-transform: uppercase;
+    line-height: 0.85;
+}
+
+/* Character Section - Bottom Right */
+.character-section {
+    position: fixed;
+    bottom: 50px;   /* raise / lower the whole star + portrait with this one number */
+    right: 60px;
+    z-index: 5;
+}
+
+/* Star frame. Everything inside is positioned in % of this box (or scales with --s), so it
+   resizes as one unit. The star itself spans roughly x 8-92%, y 7-93% of the frame. */
+.character-star-frame {
+    --s: 1;      /* overall size of the star + everything on it (1 = 230px) */
+    --hp-h: max(8px, calc(11px * var(--s)));
+    --mp-h: max(5px, calc(6.5px * var(--s)));
+    width: calc(230px * var(--s));
+    height: calc(230px * var(--s));
+    position: relative;
+    z-index: 1;
+}
+
+/* Star: tilted ~22deg counter-clockwise like the reference, drawn as an SVG with a real stroke
+   (uniform gold outline, dark fill). Glow is a drop-shadow. font-size:0 hides the ★ in the HTML. */
+.star-bg {
+    position: absolute;
+    inset: 0;
+    font-size: 0;
+    color: transparent;
+    z-index: 0;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpolygon points='36.35,6.82 58.36,29.15 88.27,19.76 73.83,47.59 92,73.14 61.07,68.01 42.39,93.18 37.71,62.18 8,52.19 36.03,38.17' fill='%230d0904' fill-opacity='0.92' stroke='%23f2c81c' stroke-width='3.2' stroke-linejoin='miter' stroke-miterlimit='10'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+    filter:
+        drop-shadow(0 0 4px rgba(255, 204, 0, 0.9))
+        drop-shadow(0 0 12px rgba(255, 190, 0, 0.5));
+}
+
+/* Portrait window. It covers the whole star frame and is cut to the star's lower outline
+   (the polygon follows the star's edge, pulled in a touch so the gold outline stays visible),
+   but it is OPEN AT THE TOP - so the head / fist can rise above the star like in the reference.
+   To tweak the cut, edit the percentages in clip-path (x% y%, frame-relative). */
+.portrait {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    clip-path: polygon(12.94% -40%, 84.48% -40%, 84.48% 22.94%, 71.61% 47.75%, 87.8% 70.52%, 60.24% 65.95%, 43.59% 88.38%, 39.42% 60.75%, 12.94% 51.85%);
+}
+
+/* The character image itself is a transparent cutout. Move/resize it with left, top and width -
+   the height follows the image's own shape. */
+.character-image {
+    position: absolute;
+    left: 12%;
+    top: 17%;
+    width: 88%;
+    height: auto;
+}
+
+/* Level tag - dark brush-stroke banner just off the star's upper-left (clear of the fist) */
+.level-badge {
+    position: absolute;
+    left: 0%;
+    top: 10%;
+    width: 37%;
+    height: 14%;
+    min-height: calc(24px * var(--s));
+    display: flex;
+    align-items: baseline;
+    justify-content: flex-start;
+    gap: 3px;
+    padding: calc(5px * var(--s)) 0 0 10%;
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.92) 0%, rgba(0, 0, 0, 0.88) 75%, rgba(0, 0, 0, 0.55) 100%);
+    clip-path: polygon(0 14%, 6% 0, 100% 8%, 94% 100%, 4% 90%);
+    color: #ffffff;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    z-index: 3;
+}
+
+.level-badge .lv {
+    font-size: calc(0.82rem * var(--s));
+    font-weight: 800;
+    letter-spacing: 0.02rem;
+}
+
+.level-badge .lv-num {
+    font-size: calc(1.42rem * var(--s));
+    font-weight: 300;
+    letter-spacing: calc(0.14rem * var(--s));
+}
+
+/* HP section - left-aligned column in the star's lower half */
+.hp-section {
+    position: absolute;
+    left: 22.9%;
+    bottom: calc(100% - 57.8% - var(--hp-h));
+    width: 40%;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+/* HP value - big white number over the star's lower body */
+.hp-value {
+    font-family: 'Impact', sans-serif;
+    font-size: calc(2.05rem * var(--s));
+    line-height: 1;
+    color: #ffffff;
+    text-shadow: 2px 2px 3px rgba(0, 0, 0, 1), 0 0 6px rgba(0, 0, 0, 0.9);
+    letter-spacing: 0.05rem;
+    padding-left: 3px;
+    margin-bottom: 2px;
+}
+
+/* HP bar - flat red, gray track, dark outline */
+.hp-bar {
+    width: 100%;
+    height: var(--hp-h);
+    background: #55575a;
+    border: 2px solid #0b0b0b;
+    border-radius: 1px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6);
+}
+
+.hp-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(to bottom, #e01212 0%, #b40000 100%);
+}
+
+/* MP section - directly under the HP bar */
+.mp-section {
+    position: absolute;
+    left: 20.8%;
+    top: calc(57.8% + var(--hp-h) + 3px);
+    width: 32%;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+}
+
+/* MP value - teal */
+.mp-value {
+    font-family: 'Impact', sans-serif;
+    font-size: calc(1.2rem * var(--s));
+    line-height: 1;
+    color: #3fe3c3;
+    text-shadow: 2px 2px 3px rgba(0, 0, 0, 1), 0 0 5px rgba(0, 0, 0, 0.9);
+    letter-spacing: 0.05rem;
+    padding-left: 2px;
+}
+
+/* MP bar - teal, thin */
+.mp-bar {
+    width: 100%;
+    height: var(--mp-h);
+    background: rgba(10, 30, 28, 0.85);
+    border: 1px solid #0b0b0b;
+    border-radius: 1px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6);
+}
+
+.mp-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 70%;
+    background: linear-gradient(to bottom, #35dcbc 0%, #21b79c 100%);
+}
+
+/* Diamond Buttons - moved more to the left, TWO gradient borders per button */
+.menu-buttons {
+    position: fixed;
+    bottom: 20%;
+    left: 50%;
+    transform: translateX(-50%) translateY(20%);
+    z-index: 5;
+}
+
+.diamond-grid {
+    position: relative;
+    width: 360px;
+    height: 360px;
+}
+
+/* The wrapper and button boxes are squares, so neighbouring boxes overlap near the middle.
+   pointer-events: none on them + auto on .diamond-shape means only the diamond itself is clickable. */
+.diamond-btn-wrapper {
+    position: absolute;
+    pointer-events: none;
+}
+
+.diamond-btn-wrapper:hover {
+    z-index: 2;
+}
+
+.diamond-btn-wrapper.top {
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.diamond-btn-wrapper.left {
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+}
+
+.diamond-btn-wrapper.right {
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+}
+
+.diamond-btn-wrapper.bottom {
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.diamond-btn {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    background: transparent;
+    border: none;
+    padding: 0;
+    pointer-events: none;
+}
+
+/* Base diamond - using ::after and ::before for two gradient borders */
+.diamond-shape {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(45deg);
+    width: 120px;
+    height: 120px;
+    background: linear-gradient(135deg,
+        rgba(35, 35, 35, 0.85) 0%,
+        rgba(50, 50, 50, 0.90) 50%,
+        rgba(35, 35, 35, 0.85) 100%
+    );
+    box-shadow:
+        inset 0 4px 20px rgba(0, 0, 0, 0.8),
+        0 6px 25px rgba(0, 0, 0, 0.7);
+    transition: all 0.3s ease;
+    border: none;
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+/* Top button - GREEN, bottom vertex faces center: BOTTOM + RIGHT edges (pre-rotation), bright at bottom-right corner */
+.diamond-btn-wrapper.top .diamond-shape::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 0;
+    width: calc(100% + 3px);
+    height: 3px;
+    background: linear-gradient(to left, #33ff33 0%, rgba(51, 255, 51, 0.5) 50%, transparent 100%);
+    box-shadow: 0 0 12px rgba(51, 255, 51, 0.6);
+}
+
+.diamond-btn-wrapper.top .diamond-shape::before {
+    content: '';
+    position: absolute;
+    right: -3px;
+    top: 0;
+    width: 3px;
+    height: 100%;
+    background: linear-gradient(to top, #33ff33 0%, rgba(51, 255, 51, 0.5) 50%, transparent 100%);
+    box-shadow: 0 0 12px rgba(51, 255, 51, 0.6);
+}
+
+/* Left button - ORANGE, right vertex faces center: RIGHT + TOP edges (pre-rotation), bright at top-right corner */
+.diamond-btn-wrapper.left .diamond-shape::after {
+    content: '';
+    position: absolute;
+    right: -3px;
+    top: 0;
+    width: 3px;
+    height: 100%;
+    background: linear-gradient(to bottom, #ff9933 0%, rgba(255, 153, 51, 0.5) 50%, transparent 100%);
+    box-shadow: 0 0 12px rgba(255, 153, 51, 0.6);
+}
+
+.diamond-btn-wrapper.left .diamond-shape::before {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: 0;
+    width: calc(100% + 3px);
+    height: 3px;
+    background: linear-gradient(to left, #ff9933 0%, rgba(255, 153, 51, 0.5) 50%, transparent 100%);
+    box-shadow: 0 0 12px rgba(255, 153, 51, 0.6);
+}
+
+/* Right button - RED, left vertex faces center: LEFT + BOTTOM edges (pre-rotation), bright at bottom-left corner */
+.diamond-btn-wrapper.right .diamond-shape::after {
+    content: '';
+    position: absolute;
+    left: -3px;
+    top: 0;
+    width: 3px;
+    height: 100%;
+    background: linear-gradient(to top, #ff3333 0%, rgba(255, 51, 51, 0.5) 50%, transparent 100%);
+    box-shadow: 0 0 12px rgba(255, 51, 51, 0.6);
+}
+
+.diamond-btn-wrapper.right .diamond-shape::before {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: -3px;
+    width: calc(100% + 3px);
+    height: 3px;
+    background: linear-gradient(to right, #ff3333 0%, rgba(255, 51, 51, 0.5) 50%, transparent 100%);
+    box-shadow: 0 0 12px rgba(255, 51, 51, 0.6);
+}
+
+/* Bottom button - BLUE, top vertex faces center: TOP + LEFT edges (pre-rotation), bright at top-left corner */
+.diamond-btn-wrapper.bottom .diamond-shape::after {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    width: calc(100% + 3px);
+    height: 3px;
+    background: linear-gradient(to right, #5599ff 0%, rgba(85, 153, 255, 0.5) 50%, transparent 100%);
+    box-shadow: 0 0 12px rgba(85, 153, 255, 0.6);
+}
+
+.diamond-btn-wrapper.bottom .diamond-shape::before {
+    content: '';
+    position: absolute;
+    left: -3px;
+    top: 0;
+    width: 3px;
+    height: 100%;
+    background: linear-gradient(to bottom, #5599ff 0%, rgba(85, 153, 255, 0.5) 50%, transparent 100%);
+    box-shadow: 0 0 12px rgba(85, 153, 255, 0.6);
+}
+
+.btn-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    z-index: 2;
+}
+
+.btn-text-en {
+    font-family: 'Impact', sans-serif;
+    font-size: 1.4rem;
+    color: #FFD700;
+    text-shadow:
+        3px 3px 6px rgba(0, 0, 0, 1),
+        0 0 15px rgba(255, 215, 0, 0.5);
+    letter-spacing: 0.12rem;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+}
+
+.btn-text-jp {
+    font-family: sans-serif;
+    font-size: 0.85rem;
+    color: rgba(255, 215, 0, 0.7);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 1);
+    transition: all 0.3s ease;
+}
+
+.diamond-btn:hover .diamond-shape {
+    box-shadow:
+        0 0 40px rgba(255, 215, 0, 0.9),
+        inset 0 4px 25px rgba(0, 0, 0, 0.9),
+        0 8px 30px rgba(0, 0, 0, 0.8);
+    transform: translate(-50%, -50%) rotate(45deg) scale(1.1);
+}
+
+.diamond-btn:hover .diamond-shape::after,
+.diamond-btn:hover .diamond-shape::before {
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.9);
+}
+
+.diamond-btn:hover .btn-text-en {
+    color: #FFED4E;
+    text-shadow:
+        0 0 25px rgba(255, 237, 78, 1),
+        3px 3px 6px rgba(0, 0, 0, 1);
+}
+
+.diamond-btn:hover .btn-text-jp {
+    color: #FFD700;
+    text-shadow:
+        0 0 15px rgba(255, 215, 0, 0.8),
+        2px 2px 4px rgba(0, 0, 0, 1);
+}
+
+.diamond-btn:focus-visible .diamond-shape {
+    box-shadow:
+        0 0 0 3px rgba(255, 215, 0, 0.9),
+        0 0 30px rgba(255, 215, 0, 0.7),
+        inset 0 4px 20px rgba(0, 0, 0, 0.8);
+}
+
+.diamond-btn:active {
+    transform: scale(0.95);
+}
+
+/* Responsive Design */
+@media (max-width: 1400px) {
+    .menu-buttons {
+        left: 50px;
+        bottom: 70px;
+    }
+
+    .diamond-grid {
+        width: 340px;
+        height: 340px;
+    }
+
+    .diamond-btn {
+        width: 140px;
+        height: 140px;
+    }
+
+    .diamond-shape {
+        width: 110px;
+        height: 110px;
+    }
+
+    .character-section {
+        right: 40px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .menu-buttons {
+        left: 40px;
+        bottom: 60px;
+    }
+
+    .diamond-grid {
+        width: 300px;
+        height: 300px;
+    }
+
+    .diamond-btn {
+        width: 120px;
+        height: 120px;
+    }
+
+    .diamond-shape {
+        width: 95px;
+        height: 95px;
+    }
+
+    .btn-text-en {
+        font-size: 1.2rem;
+    }
+
+    .btn-text-jp {
+        font-size: 0.75rem;
+    }
+
+    .character-section {
+        right: 30px;
+        bottom: 100px;
+    }
+
+    .character-star-frame {
+        --s: 0.77;
+    }
+}
+
+@media (max-width: 768px) {
+    .menu-buttons {
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: 60px;
+    }
+
+    .diamond-grid {
+        width: 280px;
+        height: 280px;
+    }
+
+    .diamond-btn {
+        width: 110px;
+        height: 110px;
+    }
+
+    .diamond-shape {
+        width: 85px;
+        height: 85px;
+    }
+
+    .btn-text-en {
+        font-size: 1rem;
+    }
+
+    .btn-text-jp {
+        font-size: 0.7rem;
+    }
+}

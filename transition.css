@@ -1,0 +1,209 @@
+/* =====================================================================
+   transition.css - the hand-off from the start screen to the home page.
+
+   PART 1  DIAGONAL WIPE   two black halves with a gold edge.
+                           start.html adds  html.wipe-out  -> they slide together (screen goes black)
+                           index.html adds  html.wipe-in   -> they start closed and slide apart
+   PART 2  HOME ENTRANCE   html.enter  -> every piece of the home screen assembles itself
+   The classes are added by start.js / a tiny script in index.html's <head>,
+   and removed again a few seconds later.
+   ===================================================================== */
+
+/* ---------- PART 1: THE WIPE ---------- */
+html.wipe-in::before,
+html.wipe-in::after,
+html.wipe-out::before,
+html.wipe-out::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 100000;
+    pointer-events: none;
+}
+
+/* top-left half. "to bottom right" puts the 50% line exactly on the diagonal, so the gold rim sits on the seam */
+html.wipe-in::before,
+html.wipe-out::before {
+    background: linear-gradient(to bottom right, #000 0%, #000 48.4%, #7a5200 49.4%, #ffd700 49.82%, #fff 50%);
+    clip-path: polygon(0 0, 100% 0, 0 100%);
+}
+
+/* bottom-right half */
+html.wipe-in::after,
+html.wipe-out::after {
+    background: linear-gradient(to bottom right, #fff 50%, #ffd700 50.18%, #7a5200 50.6%, #000 51.6%, #000 100%);
+    clip-path: polygon(100% 0, 100% 100%, 0 100%);
+}
+
+/* opening (home page): start closed, slide apart along the diagonal */
+html.wipe-in::before { animation: wipeOpenA 1.05s 0.3s cubic-bezier(0.7, 0, 0.2, 1) both; }
+html.wipe-in::after  { animation: wipeOpenB 1.05s 0.3s cubic-bezier(0.7, 0, 0.2, 1) both; }
+
+/* closing (start screen): slide in from off-screen and meet on the diagonal */
+html.wipe-out::before { animation: wipeCloseA 0.75s cubic-bezier(0.6, 0, 0.3, 1) both; }
+html.wipe-out::after  { animation: wipeCloseB 0.75s cubic-bezier(0.6, 0, 0.3, 1) both; }
+
+@keyframes wipeOpenA  { to   { transform: translate(-62%, -62%); } }
+@keyframes wipeOpenB  { to   { transform: translate(62%, 62%); } }
+@keyframes wipeCloseA { from { transform: translate(-62%, -62%); } }
+@keyframes wipeCloseB { from { transform: translate(62%, 62%); } }
+
+/* ---------- PART 2: HOME SCREEN ENTRANCE ----------
+   Every rule below uses "backwards" fill: during its delay the element sits in the
+   FROM state, and when the animation ends it settles into its normal style. */
+
+/* the dragon fades up while pushing in slowly, the fog rolls in under it */
+html.enter body::before {
+    animation: enterDragon 3s 0.35s ease-out backwards;
+}
+
+html.enter .fog-container {
+    animation: enterFade 2.4s 0.7s ease-out backwards;
+}
+
+/* title: the kanji powers on like a tube light, then the lines hit one by one */
+html.enter .title-kanji {
+    animation: tubeFlicker 7s linear infinite, kanjiOn 1.5s 0.75s backwards;
+}
+
+html.enter .title-like-line {
+    animation: enterFromLeft 0.7s 0.95s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+
+html.enter .title-portfolio {
+    animation: enterSlam 0.85s 1.1s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+html.enter .title-infinite {
+    animation: enterFromRight 0.65s 1.45s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+
+html.enter .title-projects {
+    animation: enterFromLeft 0.65s 1.6s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+
+/* the four diamonds fly in from their own side, spinning, and snap into place (slight overshoot) */
+html.enter .diamond-btn-wrapper.top .diamond-btn {
+    animation: flyTop 1s 1.1s cubic-bezier(0.2, 1.25, 0.35, 1) backwards;
+}
+
+html.enter .diamond-btn-wrapper.left .diamond-btn {
+    animation: flyLeft 1s 1.22s cubic-bezier(0.2, 1.25, 0.35, 1) backwards;
+}
+
+html.enter .diamond-btn-wrapper.right .diamond-btn {
+    animation: flyRight 1s 1.34s cubic-bezier(0.2, 1.25, 0.35, 1) backwards;
+}
+
+html.enter .diamond-btn-wrapper.bottom .diamond-btn {
+    animation: flyBottom 1s 1.46s cubic-bezier(0.2, 1.25, 0.35, 1) backwards;
+}
+
+/* the star rises from below with a bounce, then the HP and MP bars fill up */
+html.enter .character-section {
+    animation: starRise 1.1s 1.9s cubic-bezier(0.2, 1.2, 0.3, 1) backwards;
+}
+
+html.enter .hp-fill {
+    animation: barGrow 1.1s 2.7s cubic-bezier(0.3, 0.8, 0.2, 1) backwards;
+}
+
+html.enter .mp-fill {
+    animation: barGrow 1.1s 2.9s cubic-bezier(0.3, 0.8, 0.2, 1) backwards;
+}
+
+@keyframes enterDragon {
+    from { opacity: 0; transform: translate(-50%, -50%) scale(1.2); }
+}
+
+@keyframes enterFade {
+    from { opacity: 0; }
+}
+
+@keyframes kanjiOn {
+    0%   { opacity: 0; }
+    8%   { opacity: 0.95; }
+    12%  { opacity: 0.05; }
+    22%  { opacity: 0.85; }
+    27%  { opacity: 0; }
+    45%  { opacity: 0.7; }
+    50%  { opacity: 0.15; }
+    70%  { opacity: 1; }
+}
+
+@keyframes enterFromLeft {
+    from { opacity: 0; transform: translateX(-140px) skewX(-14deg); }
+}
+
+@keyframes enterFromRight {
+    from { opacity: 0; transform: translateX(140px) skewX(14deg); }
+}
+
+@keyframes enterSlam {
+    0%   { opacity: 0; transform: scale(2.3); filter: blur(12px); }
+    60%  { opacity: 1; transform: scale(0.97); filter: blur(0); }
+}
+
+@keyframes flyTop {
+    from { opacity: 0; transform: translateY(-260px) rotate(-140deg) scale(0.2); }
+}
+
+@keyframes flyLeft {
+    from { opacity: 0; transform: translateX(-300px) rotate(-140deg) scale(0.2); }
+}
+
+@keyframes flyRight {
+    from { opacity: 0; transform: translateX(300px) rotate(140deg) scale(0.2); }
+}
+
+@keyframes flyBottom {
+    from { opacity: 0; transform: translateY(260px) rotate(140deg) scale(0.2); }
+}
+
+@keyframes starRise {
+    from { opacity: 0; transform: translateY(240px) scale(0.7) rotate(14deg); }
+}
+
+@keyframes barGrow {
+    from { width: 0; }
+}
+
+/* ---------- small sound toggle on the home page (added by home-music.js) ---------- */
+.sound-toggle {
+    position: fixed;
+    top: 18px;
+    right: 22px;
+    z-index: 20;
+    padding: 7px 14px;
+    border: 1px solid #555;
+    border-radius: 2px;
+    background: rgba(0, 0, 0, 0.55);
+    color: #cfcfd6;
+    font: 600 0.72rem / 1 'Segoe UI', Arial, sans-serif;
+    letter-spacing: 0.16em;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+.sound-toggle:hover,
+.sound-toggle:focus-visible {
+    color: #FFD700;
+    border-color: #FFD700;
+    box-shadow: 0 0 12px rgba(255, 200, 0, 0.35);
+    outline: none;
+}
+
+.sound-toggle[aria-pressed="true"] {
+    color: #FFD700;
+    border-color: rgba(255, 215, 0, 0.6);
+}
+
+/* ---------- reduced motion: no wipe, no choreography ---------- */
+@media (prefers-reduced-motion: reduce) {
+    html.wipe-in::before,
+    html.wipe-in::after,
+    html.wipe-out::before,
+    html.wipe-out::after {
+        display: none;
+    }
+}

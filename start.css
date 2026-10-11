@@ -1,0 +1,453 @@
+/* =====================================================================
+   START SCREEN (title screen) - loads after style.css, so it can override it.
+   Sequence, driven by body[data-stage] (start.js changes it):
+     logo    -> studio-style logo card
+     drop    -> the title drops in (kanji slam, lines slide, impact flash)
+     ready   -> "PRESS ANY BUTTON" blinking
+     leaving -> flash + zoom + fade to black, then index.html loads
+   Rule used everywhere below: the normal (un-animated) style is the FINAL look,
+   and each stage animation only describes where an element comes FROM.
+   ===================================================================== */
+
+body.start-page {
+    --gold: #FFD700;
+    background: #000;
+    overflow: hidden;
+    -webkit-user-select: none;
+            user-select: none;
+}
+
+/* The faint dragon from the home page: centred, fades in during the drop, then drifts */
+body.start-page::before {
+    left: 50%;
+    top: 54%;
+    width: 92%;
+    height: 92%;
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.08);
+    transition: opacity 2.4s ease, transform 16s ease-out;
+}
+
+body.start-page[data-stage="drop"]::before,
+body.start-page[data-stage="ready"]::before,
+body.start-page[data-stage="leaving"]::before {
+    opacity: 0.2;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+/* ---------- LAYOUT ---------- */
+.screen {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    display: grid;
+    place-items: center;
+}
+
+.screen.shake {
+    animation: screenShake 0.45s linear;
+}
+
+.vignette {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(ellipse at 50% 48%, transparent 42%, rgba(0, 0, 0, 0.88) 100%);
+}
+
+/* ---------- 1. LOGO CARD ---------- */
+.intro-card {
+    position: absolute;
+    text-align: center;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.intro-card .by {
+    padding-left: 0.5em;
+    font: 600 clamp(0.9rem, 2.4vh, 1.3rem) / 1 'Segoe UI', Arial, sans-serif;
+    letter-spacing: 0.5em;
+    color: #d9d9de;
+}
+
+.intro-card .pres {
+    margin-top: 1.1rem;
+    padding-left: 0.3em;
+    font: 400 clamp(1.8rem, 5.5vh, 3.2rem) / 1 'Edo SZ', 'Impact', sans-serif;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-shadow: 0 0 22px rgba(255, 215, 0, 0.45);
+}
+
+body[data-stage="logo"] .intro-card {
+    animation: cardInOut 2.4s ease both;
+}
+
+/* ---------- 2. THE TITLE ---------- */
+.logo-block {
+    position: relative;
+    margin-top: -6vh;
+}
+
+.logo-float {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    animation: logoFloat 7s ease-in-out infinite;
+}
+
+body[data-stage="logo"] .logo-block,
+body[data-stage="logo"] .prompt {
+    opacity: 0;
+}
+
+/* kanji: faint cool glow that flickers like a tube light (same idea as the home page) */
+.kanji-wrap {
+    line-height: 1;
+    color: rgba(240, 248, 255, 0.3);
+    text-shadow:
+        0 0 12px rgba(220, 235, 255, 0.6),
+        0 0 36px rgba(200, 225, 255, 0.4),
+        0 0 80px rgba(180, 210, 255, 0.25);
+    animation: kanjiFlicker 7s linear infinite;
+}
+
+.st-kanji {
+    display: block;
+    margin-bottom: -0.1em;
+    font-family: 'Edo SZ', 'Impact', sans-serif;
+    font-size: clamp(5rem, 19vh, 10rem);
+    font-weight: 900;
+}
+
+.st-title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: 'Edo SZ', 'Impact', sans-serif;
+    font-weight: 400;
+    line-height: 1;
+}
+
+.st-like {
+    padding-left: 0.3em;
+    font-size: clamp(1.5rem, 5.2vh, 3.2rem);
+    letter-spacing: 0.3em;
+    color: #ffffff;
+    text-shadow: 3px 3px 6px #000, 0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+.st-like b {
+    font-size: 1.4em;
+    font-weight: 900;
+    color: #ff3333;
+    text-shadow: 3px 3px 6px #000, 0 0 24px rgba(255, 51, 51, 0.7);
+}
+
+.st-portfolio {
+    margin-top: -0.05em;
+    padding-left: 0.14em;
+    font-size: clamp(2.8rem, min(12.5vh, 9.8vw), 7.4rem);
+    letter-spacing: 0.14em;
+    line-height: 0.9;
+    color: #ffffff;
+    text-shadow: 4px 4px 10px #000, 0 0 30px rgba(255, 255, 255, 0.35);
+}
+
+.st-sub {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 0.35em;
+}
+
+/* INFINITE / PROJECTS: gold with a light that sweeps across it */
+.st-sub span {
+    padding-left: 0.2em;
+    font-size: clamp(2rem, min(9vh, 7.4vw), 5.4rem);
+    letter-spacing: 0.2em;
+    line-height: 0.92;
+    background: linear-gradient(100deg, #b8860b 0%, #FFD700 35%, #fff6b0 50%, #FFD700 65%, #b8860b 100%);
+    background-size: 250% 100%;
+    -webkit-background-clip: text;
+            background-clip: text;
+    color: transparent;
+    filter: drop-shadow(3px 3px 6px #000) drop-shadow(0 0 18px rgba(255, 215, 0, 0.45));
+    animation: goldShimmer 4.5s linear infinite;
+}
+
+.st-rule {
+    width: min(62vw, 720px);
+    height: 3px;
+    margin-top: 2.6vh;
+    background: linear-gradient(90deg, transparent, var(--gold) 20%, #ffffff 50%, var(--gold) 80%, transparent);
+    box-shadow: 0 0 14px rgba(255, 200, 0, 0.7);
+}
+
+/* the drop: each piece comes FROM somewhere, with its own delay */
+body[data-stage="drop"] .st-kanji {
+    animation: kanjiSlam 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+body[data-stage="drop"] .st-like {
+    animation: slideFromLeft 0.7s 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+body[data-stage="drop"] .st-portfolio {
+    animation: titleSlam 0.8s 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+body[data-stage="drop"] .st-sub span:nth-child(1) {
+    animation: slideFromRight 0.65s 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) both, goldShimmer 4.5s linear infinite;
+}
+
+body[data-stage="drop"] .st-sub span:nth-child(2) {
+    animation: slideFromLeft 0.65s 1.35s cubic-bezier(0.2, 0.8, 0.2, 1) both, goldShimmer 4.5s linear infinite;
+}
+
+body[data-stage="drop"] .st-rule {
+    animation: ruleGrow 0.9s 1.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+/* ---------- 3. PRESS ANY BUTTON ---------- */
+.prompt {
+    position: absolute;
+    left: 50%;
+    bottom: clamp(70px, 15vh, 150px);
+    transform: translateX(-50%);
+    padding-left: 0.42em;
+    font: 600 clamp(0.95rem, 2.6vh, 1.5rem) / 1 'Segoe UI', Arial, sans-serif;
+    letter-spacing: 0.42em;
+    white-space: nowrap;
+    color: #ffffff;
+    text-shadow: 0 0 14px rgba(255, 255, 255, 0.55), 2px 2px 4px #000;
+    cursor: pointer;
+    opacity: 0;
+}
+
+.prompt::after {
+    content: '';
+    display: block;
+    height: 2px;
+    margin-top: 12px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    box-shadow: 0 0 10px rgba(255, 200, 0, 0.6);
+}
+
+body[data-stage="ready"] .prompt {
+    opacity: 1;
+    animation: promptIn 0.9s ease-out backwards, promptPulse 2s 0.9s ease-in-out infinite;
+}
+
+body[data-stage="leaving"] .prompt {
+    opacity: 1;
+    animation: promptFlash 0.12s steps(2) 6;
+}
+
+.legal {
+    position: absolute;
+    bottom: 16px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font: 400 0.72rem / 1 'Segoe UI', Arial, sans-serif;
+    letter-spacing: 0.18em;
+    color: #777;
+}
+
+.sound-btn {
+    position: absolute;
+    top: 18px;
+    right: 22px;
+    padding: 7px 14px;
+    border: 1px solid #555;
+    border-radius: 2px;
+    background: rgba(0, 0, 0, 0.55);
+    color: #cfcfd6;
+    font: 600 0.72rem / 1 'Segoe UI', Arial, sans-serif;
+    letter-spacing: 0.16em;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+.sound-btn:hover,
+.sound-btn:focus-visible {
+    color: var(--gold);
+    border-color: var(--gold);
+    box-shadow: 0 0 12px rgba(255, 200, 0, 0.35);
+    outline: none;
+}
+
+.sound-btn[aria-pressed="true"] {
+    color: var(--gold);
+    border-color: rgba(255, 215, 0, 0.6);
+}
+
+/* ---------- EFFECTS (flash, ring, curtain) ---------- */
+.flash {
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    pointer-events: none;
+    opacity: 0;
+    background: radial-gradient(circle at 50% 46%, #ffffff 0%, rgba(255, 230, 140, 0.85) 30%, rgba(255, 200, 0, 0) 72%);
+}
+
+.flash.go {
+    animation: impactFlash 0.55s ease-out;
+}
+
+.flash.big {
+    animation: leaveFlash 0.8s ease-out forwards;
+}
+
+.shockwave {
+    position: fixed;
+    z-index: 25;
+    left: 50%;
+    top: 46%;
+    width: 30vmin;
+    height: 30vmin;
+    margin: -15vmin 0 0 -15vmin;
+    border-radius: 50%;
+    border: 3px solid rgba(255, 215, 0, 0.9);
+    box-shadow: 0 0 30px rgba(255, 200, 0, 0.7), inset 0 0 30px rgba(255, 200, 0, 0.5);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.shockwave.go {
+    animation: ring 0.9s cubic-bezier(0.1, 0.7, 0.3, 1);
+}
+
+.curtain {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    background: #000;
+    opacity: 0;
+    pointer-events: none;
+}
+
+body[data-stage="leaving"] .curtain {
+    animation: curtainIn 0.55s 0.85s ease-in forwards;
+}
+
+body[data-stage="leaving"] .logo-block {
+    animation: logoLeave 1.2s cubic-bezier(0.5, 0, 0.2, 1) both;
+}
+
+/* ---------- KEYFRAMES ---------- */
+@keyframes cardInOut {
+    0%   { opacity: 0; transform: scale(0.96); }
+    22%, 74% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.04); }
+}
+
+@keyframes logoFloat {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-5px); }
+}
+
+@keyframes kanjiFlicker {
+    0%, 30%, 32%, 36%, 68%, 70%, 72%, 100% {
+        color: rgba(240, 248, 255, 0.3);
+        text-shadow: 0 0 12px rgba(220, 235, 255, 0.6), 0 0 36px rgba(200, 225, 255, 0.4), 0 0 80px rgba(180, 210, 255, 0.25);
+    }
+    31%, 33%, 69% {
+        color: rgba(240, 248, 255, 0.1);
+        text-shadow: 0 0 4px rgba(220, 235, 255, 0.12), 0 0 10px rgba(200, 225, 255, 0.06), 0 0 20px rgba(180, 210, 255, 0.04);
+    }
+    34%, 71% {
+        color: rgba(240, 248, 255, 0.2);
+        text-shadow: 0 0 8px rgba(220, 235, 255, 0.35), 0 0 20px rgba(200, 225, 255, 0.22), 0 0 40px rgba(180, 210, 255, 0.12);
+    }
+}
+
+@keyframes kanjiSlam {
+    0%   { opacity: 0; transform: scale(3.4); filter: blur(16px); }
+    55%  { opacity: 1; transform: scale(0.93); filter: blur(0); }
+}
+
+@keyframes slideFromLeft {
+    from { opacity: 0; transform: translateX(-140px) skewX(-14deg); }
+}
+
+@keyframes slideFromRight {
+    from { opacity: 0; transform: translateX(140px) skewX(14deg); }
+}
+
+@keyframes titleSlam {
+    0%   { opacity: 0; transform: scale(2.2); filter: blur(12px); }
+    60%  { opacity: 1; transform: scale(0.97); filter: blur(0); }
+}
+
+@keyframes ruleGrow {
+    from { transform: scaleX(0); opacity: 0; }
+}
+
+@keyframes goldShimmer {
+    from { background-position: 150% 0; }
+    to   { background-position: -100% 0; }
+}
+
+@keyframes promptIn {
+    from { opacity: 0; transform: translate(-50%, 10px); }
+}
+
+@keyframes promptPulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.3; }
+}
+
+@keyframes promptFlash {
+    0%   { opacity: 1; }
+    100% { opacity: 0.1; }
+}
+
+@keyframes impactFlash {
+    0%   { opacity: 0; }
+    12%  { opacity: 0.95; }
+    100% { opacity: 0; }
+}
+
+@keyframes leaveFlash {
+    0%   { opacity: 0; }
+    18%  { opacity: 1; }
+    100% { opacity: 0.55; }
+}
+
+@keyframes ring {
+    0%   { opacity: 0.9; transform: scale(0.1); }
+    100% { opacity: 0; transform: scale(7); }
+}
+
+@keyframes curtainIn {
+    to { opacity: 1; }
+}
+
+@keyframes logoLeave {
+    0%   { opacity: 1; transform: scale(1); filter: none; }
+    100% { opacity: 0; transform: scale(1.2); filter: blur(6px) brightness(1.7); }
+}
+
+@keyframes screenShake {
+    0%, 100% { transform: translate(0, 0); }
+    10% { transform: translate(-9px, 5px); }
+    25% { transform: translate(8px, -6px); }
+    40% { transform: translate(-6px, -4px); }
+    55% { transform: translate(5px, 4px); }
+    70% { transform: translate(-3px, 2px); }
+    85% { transform: translate(2px, -1px); }
+}
+
+/* ---------- REDUCED MOTION: no shake / flashes, instant changes ---------- */
+@media (prefers-reduced-motion: reduce) {
+    body.start-page *,
+    body.start-page::before {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
