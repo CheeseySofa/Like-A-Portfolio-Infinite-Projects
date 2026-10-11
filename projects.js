@@ -29,7 +29,8 @@
        SETTINGS
        --------------------------------------------------------------- */
     const CONFIG = {
-        USER: 'Cheeseysofa',                 // <<< put the GitHub username here, e.g. 'octocat'. Empty = page shows nothing.
+        USER: 'Cheeseysofa',
+       // <<< put the GitHub username here, e.g. 'octocat'. Empty = page shows nothing.
         HUB_IMAGE: '',            // picture in the middle of the wheel, e.g. 'images/me.png'.
                                   // Leave '' to use the GitHub avatar for now.
         MAX_REPOS: 36,            // the wheel has room for 6 + 12 + 18 gems
