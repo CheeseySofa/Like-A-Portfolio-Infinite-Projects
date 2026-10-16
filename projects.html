@@ -107,6 +107,7 @@
                 <circle cx="300" cy="300" r="269" fill="url(#hatch)" opacity="0.38"/>
                 <circle cx="300" cy="300" r="269" fill="none" stroke="#000" stroke-opacity="0.6" stroke-width="6"/>
                 <g id="rails"></g>
+                <g id="gates"></g>
                 <g id="links"></g>
                 <g id="nodes"></g>
 
@@ -131,9 +132,6 @@
                 <div class="shot" id="shot">
                     <div class="shot-fallback" id="shotFallback"><span id="shotInitial">?</span></div>
                     <img class="shot-img" id="shotImg" alt="" hidden>
-                    <div class="shot-activity" title="How recently this repo was pushed to">
-                        <i id="activityFill"></i>
-                    </div>
                     <div class="chips" id="chips"></div>
                     <div class="shot-note" id="shotNote"></div>
                 </div>
@@ -183,6 +181,11 @@
         <span class="hint"><kbd class="key key-wide" aria-hidden="true">Enter</kbd> Open</span>
         <a class="hint back" id="backBtn" href="homepage.html"><kbd class="key key-wide" aria-hidden="true">Esc</kbd> Back</a>
     </footer>
+
+    <!-- full-size preview picture (click the picture; click again or press Esc to close) -->
+    <div class="lightbox" id="lightbox" hidden>
+        <img id="lightboxImg" alt="">
+    </div>
 
     <script src="money-rain.js"></script>
     <script src="projects.js"></script>

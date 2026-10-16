@@ -17,7 +17,8 @@
    Controls
    Left / Right  previous / next gem      Up / Down  inner / outer ring
    Enter         open on GitHub           D          Details (README)
-   Esc / Q       back to the home page
+   Esc / Q       back to the home page    R          re-read GitHub now (skip the saved copy)
+   Click the preview picture to see it full size.
 
    >>> To change the profile, edit CONFIG below. <<<
    ===================================================================== */
@@ -29,8 +30,7 @@
        SETTINGS
        --------------------------------------------------------------- */
     const CONFIG = {
-        USER: 'Cheeseysofa',
-       // <<< put the GitHub username here, e.g. 'octocat'. Empty = page shows nothing.
+        USER: 'Cheeseysofa',                 // <<< put the GitHub username here, e.g. 'octocat'. Empty = page shows nothing.
         HUB_IMAGE: '',            // picture in the middle of the wheel, e.g. 'images/me.png'.
                                   // Leave '' to use the GitHub avatar for now.
         MAX_REPOS: 36,            // the wheel has room for 6 + 12 + 18 gems
@@ -39,6 +39,9 @@
         CACHE_MINUTES: 30,        // repo list is cached so refreshing does not burn the API limit
         SFX: true,                // tiny UI blips when you move around (starts after your first key/click)
         README_WORKERS: 4,        // how many READMEs are fetched at the same time
+        BIO: '',                  // optional: show this text as the bio instead of the one on GitHub.
+                                  // (To change it for real: github.com > your profile > Edit profile > Bio. Then press R here.)
+        PREVIEW_GATES: 0,         // 0-4: force this many locked gates open just to look at them (or add ?gates=4 to the address)
         TOKEN: ''                 // optional GitHub token (only raises the 60 requests/hour limit).
                                   // Never put a token with write access in a public site!
     };
@@ -50,6 +53,17 @@
         { r: 244, cap: 18, size: 12 }    // outer ring
     ];
     const CX = 300, CY = 300;
+
+    // The outer band is split into four locked gates (clockwise from the top-right).
+    // Repositories 19 and up land in the outer band; a gate opens as soon as one lands in it:
+    //   gate 1 opens at 19 repos, gate 2 at 23, gate 3 at 28, gate 4 at 32.
+    const GATES = [
+        { a0: -90, a1: 0,   cap: 4 },
+        { a0: 0,   a1: 90,  cap: 5 },
+        { a0: 90,  a1: 180, cap: 4 },
+        { a0: 180, a1: 270, cap: 5 }
+    ];
+    const BAND = { rIn: 224, rOut: 267 };
 
     const LANG_COLORS = {
         'JavaScript': '#f1e05a', 'TypeScript': '#3178c6', 'Python': '#3572a5', 'HTML': '#e34c26',
@@ -387,17 +401,19 @@
 
     const el = {
         wheelWrap: document.querySelector('.wheel-wrap'),
-        rails: $('rails'), links: $('links'), nodes: $('nodes'), 
+        rails: $('rails'), links: $('links'), nodes: $('nodes'), gates: $('gates'),
+        
         hub: $('hub'), hubImage: $('hubImage'), tip: $('wheelTip'),
         statRepos: $('statRepos'), statSub: $('statSub'),
         detail: $('detail'), detailBody: $('detailBody'),
-        shotImg: $('shotImg'), shotFallback: $('shotFallback'), shotInitial: $('shotInitial'),
-        activity: $('activityFill'), chips: $('chips'), shotNote: $('shotNote'),
+        shot: $('shot'), shotImg: $('shotImg'), shotFallback: $('shotFallback'), shotInitial: $('shotInitial'),
+        chips: $('chips'), shotNote: $('shotNote'),
         title: $('detailTitle'), text: $('detailText'), meta: $('detailMeta'),
         readme: $('readme'), readmeScroll: $('readmeScroll'),
         openBtn: $('openBtn'), price: $('price'),
         btnDetails: $('btnDetails'), crumbUser: $('crumbUser'), backBtn: $('backBtn'),
-        keyLeft: $('keyLeft'), keyRight: $('keyRight'), keyUp: $('keyUp'), keyDown: $('keyDown')
+        keyLeft: $('keyLeft'), keyRight: $('keyRight'), keyUp: $('keyUp'), keyDown: $('keyDown'),
+        lightbox: $('lightbox'), lightboxImg: $('lightboxImg')
     };
 
     const state = {
@@ -411,6 +427,13 @@
         withImage: 0,
         detailsOpen: false,
         priceKey: '',
+        gates: [],
+        bulbs: [],
+        deco: null,
+        ringSpin: null,
+        fx: null,
+        rot: 0,            // how far the wheel has turned (degrees)
+        rotTarget: 0,
         ready: false
     };
 
@@ -497,7 +520,8 @@
     async function loadProfile() {
         const user = CONFIG.USER;
         const key = 'proj:v1:' + user.toLowerCase();
-        const cached = cacheGet(key, CONFIG.CACHE_MINUTES * 60000);
+        const refresh = /[?&]refresh\b/.test(location.search);          // ?refresh = ignore the saved copy this once
+        const cached = refresh ? null : cacheGet(key, CONFIG.CACHE_MINUTES * 60000);
         if (cached) return cached;
 
         const profile = await ghJson('users/' + encodeURIComponent(user));
@@ -523,7 +547,16 @@
             repos: slim
         };
         cacheSet(key, data);
+        if (refresh && window.history && history.replaceState) history.replaceState(null, '', location.pathname);
         return data;
+    }
+
+    // R key: forget the saved copy of the profile and ask GitHub again
+    function refreshData() {
+        try {
+            Object.keys(localStorage).filter((k) => k.indexOf('proj:v1:') === 0).forEach((k) => localStorage.removeItem(k));
+        } catch (e) { /* ignore */ }
+        location.reload();
     }
 
     // README: raw.githubusercontent first (no API limit), the API as a last resort
@@ -606,28 +639,250 @@
         return { x: CX + r * Math.cos(a), y: CY + r * Math.sin(a) };
     }
 
+    function arcD(r, a0, a1, sweep) {
+        const p = polar(r, a0), q = polar(r, a1);
+        return 'M' + p.x.toFixed(1) + ' ' + p.y.toFixed(1) + ' A' + r + ' ' + r + ' 0 0 ' + sweep + ' ' + q.x.toFixed(1) + ' ' + q.y.toFixed(1);
+    }
+
+    // a slice of the outer band between two angles
+    function sectorD(rIn, rOut, a0, a1) {
+        const p1 = polar(rOut, a0), p2 = polar(rOut, a1), p3 = polar(rIn, a1), p4 = polar(rIn, a0);
+        return 'M' + p1.x.toFixed(1) + ' ' + p1.y.toFixed(1) +
+               ' A' + rOut + ' ' + rOut + ' 0 0 1 ' + p2.x.toFixed(1) + ' ' + p2.y.toFixed(1) +
+               ' L' + p3.x.toFixed(1) + ' ' + p3.y.toFixed(1) +
+               ' A' + rIn + ' ' + rIn + ' 0 0 0 ' + p4.x.toFixed(1) + ' ' + p4.y.toFixed(1) + ' Z';
+    }
+
+    // where slot number idx (0..17) of the outer band sits: gate by gate, spread evenly inside each gate
+    function gateSlot(idx) {
+        let left = idx;
+        for (let g = 0; g < GATES.length; g++) {
+            const G = GATES[g];
+            if (left < G.cap) return { gate: g, ang: G.a0 + (left + 0.5) * (G.a1 - G.a0) / G.cap };
+            left -= G.cap;
+        }
+        return { gate: GATES.length - 1, ang: -90 };
+    }
+
+    /* ---------- the brass ring ----------
+       fixed:    neon edge, sonar, engraved grooves, sliding glints, twinkles
+       turning:  knurled edge, studs, chasing bulbs, four diamond jewels (they turn with the wheel) */
     function buildRails() {
         el.rails.innerHTML = '';
         RINGS.forEach((ring) => svg('circle', { class: 'rail', cx: CX, cy: CY, r: ring.r }, el.rails));
 
-        // the pachinko ring: marquee bulbs on the brass bezel (they take turns lighting, slowly)
         const old = document.getElementById('deco');
         if (old) old.remove();
         const deco = svg('g', { id: 'deco' });
+        state.deco = deco;
 
-        const bulbs = svg('g', { class: 'bulbs' }, deco);
-        const N = 40;
-        for (let i = 0; i < N; i++) {
-            const p = polar(284, i * 360 / N - 90);
-            const b = svg('g', { class: 'bulb ' + (i % 2 ? 'b' : 'a'), transform: 'translate(' + p.x.toFixed(1) + ' ' + p.y.toFixed(1) + ')' }, bulbs);
-            svg('circle', { r: 7.2, fill: '#1a1204', stroke: '#000', 'stroke-opacity': 0.6, 'stroke-width': 1 }, b);
-            svg('circle', { r: 5.2, fill: '#6b4d10' }, b);                       // bulb, switched off
-            const on = svg('g', { class: 'bulb-on' }, b);                        // bulb, switched on
-            svg('circle', { r: 8.6, fill: '#ffcf40', opacity: 0.28 }, on);
-            svg('circle', { r: 5.2, fill: '#fff1a8' }, on);
-            svg('circle', { cx: -1.5, cy: -1.7, r: 1.5, fill: '#ffffff', opacity: 0.9 }, on);
+        // soft neon along the edge of the board, and sonar rings that leave the hub every few seconds
+        svg('circle', { class: 'board-neon-soft', cx: CX, cy: CY, r: 262 }, deco);
+        svg('circle', { class: 'board-neon', cx: CX, cy: CY, r: 265.5 }, deco);
+        for (let k = 0; k < 2; k++) {
+            svg('circle', { class: 'sonar', cx: CX, cy: CY, r: 46, style: 'animation-delay:' + (k * 3.2) + 's' }, deco);
         }
+
+        // engraved grooves in the brass
+        [[277.4, 'groove dark'], [278.7, 'groove light'], [290.6, 'groove dark'], [291.9, 'groove light']].forEach((g) => {
+            svg('circle', { class: g[1], cx: CX, cy: CY, r: g[0] }, deco);
+        });
+
+        const N = 40, PERIOD = 3.2;
+        const spin = svg('g', { class: 'ring-spin' }, deco);
+        state.ringSpin = spin;
+
+        // knurled outer edge
+        const knurl = svg('g', { class: 'knurl' }, spin);
+        for (let i = 0; i < 120; i++) {
+            const a = polar(293.4, i * 3), b = polar(295.7, i * 3);
+            svg('line', { x1: a.x.toFixed(1), y1: a.y.toFixed(1), x2: b.x.toFixed(1), y2: b.y.toFixed(1) }, knurl);
+        }
+
+        // brass studs between the bulbs
+        const studs = svg('g', { class: 'studs' }, spin);
+        for (let i = 0; i < N; i++) {
+            const p = polar(284, (i + 0.5) * 360 / N - 90);
+            svg('circle', { class: 'stud', cx: p.x.toFixed(1), cy: p.y.toFixed(1), r: 2.4 }, studs);
+        }
+
+        // marquee bulbs: two lights run round the ring, with a fading tail behind each
+        const bulbs = svg('g', { class: 'bulbs' }, spin);
+        state.bulbs = [];
+        for (let i = 0; i < N; i++) {
+            if (i % 10 === 0) continue;                                  // the four diamond jewels sit here
+            const ang = i * 360 / N - 90;
+            const p = polar(284, ang);
+            const b = svg('g', { class: 'bulb', transform: 'translate(' + p.x.toFixed(1) + ' ' + p.y.toFixed(1) + ')' }, bulbs);
+            svg('circle', { r: 7.2, fill: '#1a1204', stroke: '#000', 'stroke-opacity': 0.6, 'stroke-width': 1 }, b);
+            svg('circle', { r: 5.2, fill: '#6b4d10' }, b);                                       // bulb, switched off
+            const on = svg('g', { class: 'bulb-on', style: 'animation-delay:' + (-(1 - i / N) * PERIOD).toFixed(3) + 's' }, b);
+            svg('circle', { r: 10.5, fill: '#ffcf40', opacity: 0.3 }, on);                       // glow
+            svg('circle', { r: 5.2, fill: '#fff1a8' }, on);                                      // bulb, switched on
+            svg('circle', { cx: -1.5, cy: -1.7, r: 1.5, fill: '#ffffff', opacity: 0.9 }, on);
+            svg('circle', { class: 'bulb-flash', r: 8 }, b);                                     // white flash for the ripple
+            state.bulbs.push({ el: b, ang: ang });
+        }
+
+        // four diamond jewels, the colours of the four menu diamonds on the home page
+        const JEWELS = ['#e8342f', '#2f86e6', '#2fc46b', '#f0912a'];
+        [0, 10, 20, 30].forEach((i, k) => {
+            const p = polar(284, i * 360 / N - 90);
+            const jw = svg('g', { class: 'jewel', transform: 'translate(' + p.x.toFixed(1) + ' ' + p.y.toFixed(1) + ')' }, spin);
+            svg('path', { d: 'M0 -13 L13 0 L0 13 L-13 0 Z', fill: 'url(#brass)', stroke: '#2a1c04', 'stroke-width': 1.2, 'stroke-linejoin': 'round' }, jw);
+            svg('path', { d: 'M0 -9 L9 0 L0 9 L-9 0 Z', fill: JEWELS[k], stroke: '#140d02', 'stroke-width': 0.8 }, jw);
+            svg('path', { d: 'M0 -9 L9 0 L0 0 Z', fill: '#ffffff', opacity: 0.30 }, jw);
+            svg('path', { d: 'M0 9 L-9 0 L0 0 Z', fill: '#000000', opacity: 0.25 }, jw);
+            svg('circle', { class: 'jewel-shine', cx: -2.6, cy: -3.2, r: 1.9, style: 'animation-delay:' + (k * 0.8) + 's' }, jw);
+        });
+
+        // two highlights slide round the brass like light on a polished rim
+        const glints = svg('g', { class: 'bezel-glints' }, deco);
+        svg('circle', { class: 'glint-arc g1', cx: CX, cy: CY, r: 293.5, 'stroke-dasharray': '170 1674' }, glints);
+        svg('circle', { class: 'glint-arc g2', cx: CX, cy: CY, r: 275, 'stroke-dasharray': '90 1638' }, glints);
+
+        // little four-point sparkles that twinkle on the brass
+        [-62, 18, 100, 160, 214, 292].forEach((a, k) => {
+            const p = polar(288, a);
+            svg('path', {
+                class: 'twinkle', d: 'M0 -7 Q0.8 -0.8 7 0 Q0.8 0.8 0 7 Q-0.8 0.8 -7 0 Q-0.8 -0.8 0 -7Z',
+                transform: 'translate(' + p.x.toFixed(1) + ' ' + p.y.toFixed(1) + ')', style: 'animation-delay:' + (k * 0.9).toFixed(1) + 's'
+            }, glints);
+        });
+
         el.rails.parentNode.insertBefore(deco, el.rails);
+    }
+
+    // a ripple of white light round the bulbs, starting at an angle (null = all at once)
+    function bezelWave(ang) {
+        if (reduceMotion || !state.deco || !state.bulbs.length) return;
+        state.bulbs.forEach((b) => {
+            const d = ang == null ? 0 : angDiff(b.ang, ang) / 180 * 650;
+            b.el.style.setProperty('--wd', d.toFixed(0) + 'ms');
+        });
+        state.deco.classList.remove('wave');
+        void state.deco.getBoundingClientRect();
+        state.deco.classList.add('wave');
+    }
+
+    /* ---------- the locked band: four gates that open as you get more repositories ---------- */
+    function showTipText(text, node) {
+        el.tip.textContent = text;
+        const r = node.getBoundingClientRect();
+        const w = el.wheelWrap.getBoundingClientRect();
+        el.tip.style.left = (r.left + r.width / 2 - w.left) + 'px';
+        el.tip.style.top = (r.top - w.top) + 'px';
+        el.tip.classList.add('show');
+    }
+
+    function buildGates() {
+        el.gates.innerHTML = '';
+        const total = state.repos.length;
+        const before = RINGS[0].cap + RINGS[1].cap;                  // repos that fit in the two inner rings
+        const m = /[?&]gates=(\d)/.exec(location.search);
+        const preview = Math.max(CONFIG.PREVIEW_GATES || 0, m ? +m[1] : 0);
+        const rMid = (BAND.rIn + BAND.rOut) / 2;
+
+        // the band: a dark hatched ring with gold rims, and four dividers
+        svg('circle', { class: 'band', cx: CX, cy: CY, r: rMid, 'stroke-width': BAND.rOut - BAND.rIn }, el.gates);
+        svg('circle', { class: 'band-shade', cx: CX, cy: CY, r: rMid, 'stroke-width': BAND.rOut - BAND.rIn }, el.gates);
+        svg('circle', { class: 'band-rim', cx: CX, cy: CY, r: BAND.rIn }, el.gates);
+        svg('circle', { class: 'band-rim thin', cx: CX, cy: CY, r: BAND.rIn - 3.5 }, el.gates);
+        GATES.forEach((G) => {
+            const a = polar(BAND.rIn - 2, G.a0), b = polar(BAND.rOut + 1, G.a0);
+            const at = { x1: a.x.toFixed(1), y1: a.y.toFixed(1), x2: b.x.toFixed(1), y2: b.y.toFixed(1) };
+            svg('line', Object.assign({ class: 'divider' }, at), el.gates);
+            svg('line', Object.assign({ class: 'divider-tick' }, at), el.gates);
+        });
+
+        const defs = svg('defs', null, el.gates);
+        let start = 0;
+        state.gates = GATES.map((G, g) => {
+            const filled = Math.max(0, Math.min(G.cap, total - before - start));
+            const gate = { g: g, G: G, filled: filled, needs: before + start + 1, open: filled > 0 || g < preview, el: null };
+            start += G.cap;
+
+            const mid = (G.a0 + G.a1) / 2;
+            const top = (g === 0 || g === 3);          // top gates read clockwise; bottom gates the other way, so the word is upright
+            const fs = 27;
+            const rb = top ? rMid - 0.36 * fs : rMid + 0.36 * fs;
+            svg('clipPath', { id: 'gateClip' + g }, defs)
+                .appendChild(svg('path', { d: sectorD(BAND.rIn - 1, BAND.rOut + 1, G.a0 + 1.2, G.a1 - 1.2) }));
+            svg('path', { id: 'gatePath' + g, d: top ? arcD(rb, G.a0 + 9, G.a1 - 9, 1) : arcD(rb, G.a1 - 9, G.a0 + 9, 0) }, defs);
+
+            const grp = svg('g', {
+                class: 'gate', 'data-gate': g, tabindex: 0, role: 'img', style: '--gi:' + g,
+                'aria-label': gate.open ? 'Unlocked gate' : 'Locked gate: opens at ' + gate.needs + ' repositories'
+            }, el.gates);
+            gate.el = grp;
+
+            svg('path', { class: 'gate-glow', d: sectorD(BAND.rIn, BAND.rOut, G.a0 + 1.5, G.a1 - 1.5) }, grp);
+            svg('path', { class: 'gate-rim', d: arcD(BAND.rIn + 1.5, G.a0 + 3, G.a1 - 3, 1) }, grp);
+            svg('path', { class: 'gate-rim', d: arcD(BAND.rOut - 1.5, G.a0 + 3, G.a1 - 3, 1) }, grp);
+
+            // empty sockets: slots of an open gate that no repository has taken yet
+            for (let k = filled; k < G.cap; k++) {
+                const p = polar(rMid, G.a0 + (k + 0.5) * (G.a1 - G.a0) / G.cap);
+                svg('circle', { class: 'socket', cx: p.x.toFixed(1), cy: p.y.toFixed(1), r: 9.5 }, grp);
+            }
+
+            // the shutter: two plates that slide apart when the gate unlocks
+            const sh = svg('g', { class: 'shutter', 'clip-path': 'url(#gateClip' + g + ')' }, grp);
+            svg('path', { class: 'half half-a', d: sectorD(BAND.rIn + 0.5, BAND.rOut - 0.5, G.a0 + 2, mid - 0.3) }, sh);
+            svg('path', { class: 'half half-b', d: sectorD(BAND.rIn + 0.5, BAND.rOut - 0.5, mid + 0.3, G.a1 - 2) }, sh);
+            const lab = svg('g', { class: 'lock-label' }, sh);
+            const text = svg('text', { class: 'lock-text' }, lab);
+            const tp = svg('textPath', { href: '#gatePath' + g, startOffset: '50%', 'text-anchor': 'middle' }, text);
+            tp.textContent = 'Locked';
+            [-1, 1].forEach((side) => {
+                const p = polar(rMid, mid + side * 21);
+                const pl = svg('g', { class: 'padlock', transform: 'translate(' + p.x.toFixed(1) + ' ' + p.y.toFixed(1) + ')' }, lab);
+                svg('path', { class: 'shackle', d: 'M-3.6 -1 V-4.2 a3.6 3.6 0 0 1 7.2 0 V-1' }, pl);
+                svg('rect', { class: 'lock-body', x: -6, y: -1.2, width: 12, height: 9, rx: 1.8 }, pl);
+                svg('circle', { class: 'keyhole', cx: 0, cy: 3, r: 1.5 }, pl);
+            });
+
+            // hover / focus a locked gate: say how many repositories it needs
+            if (!gate.open) {
+                const tell = () => showTipText('Locked \u00b7 opens at ' + gate.needs + ' repositories (you have ' + total + ')', text);
+                grp.addEventListener('mouseenter', tell);
+                grp.addEventListener('focus', tell);
+                grp.addEventListener('mouseleave', hideTip);
+                grp.addEventListener('blur', hideTip);
+            }
+            return gate;
+        });
+
+        // gates that have a repository in them unlock themselves once the wheel has spun in
+        if (!state.fx) state.fx = svg('g', { class: 'fx', 'pointer-events': 'none' }, el.nodes.parentNode);
+        state.gates.forEach((gate) => {
+            if (!gate.open) return;
+            if (reduceMotion) { gate.el.classList.add('open'); return; }
+            setTimeout(() => unlockGate(gate), 1500 + gate.g * 420);
+        });
+    }
+
+    function unlockGate(gate) {
+        gate.el.classList.add('open');
+        bezelWave((gate.G.a0 + gate.G.a1) / 2);
+        [520, 660, 880].forEach((f, i) => setTimeout(() => blip(f, 0.09, 0.035), i * 90));
+        if (reduceMotion || !state.fx) return;
+
+        // sparkles fly out of the opening gate
+        const rMid = (BAND.rIn + BAND.rOut) / 2;
+        for (let i = 0; i < 18; i++) {
+            const a = gate.G.a0 + 6 + Math.random() * (gate.G.a1 - gate.G.a0 - 12);
+            const p = polar(rMid, a);
+            const c = svg('circle', { class: 'spark', cx: p.x.toFixed(1), cy: p.y.toFixed(1), r: (Math.random() * 1.8 + 1.2).toFixed(1) }, state.fx);
+            c.style.transformBox = 'fill-box';
+            c.style.transformOrigin = 'center';
+            const rad = a * Math.PI / 180, dist = 14 + Math.random() * 42, dir = Math.random() < 0.5 ? -1 : 1;
+            const dx = Math.cos(rad) * dist * dir, dy = Math.sin(rad) * dist * dir;
+            c.animate([
+                { transform: 'translate(0px, 0px) scale(1)', opacity: 1 },
+                { transform: 'translate(' + dx.toFixed(1) + 'px, ' + dy.toFixed(1) + 'px) scale(0.2)', opacity: 0 }
+            ], { duration: 650 + Math.random() * 600, easing: 'cubic-bezier(0.1, 0.7, 0.3, 1)' }).onfinish = () => c.remove();
+        }
     }
 
     // skill-tree link: straight out from the parent to this gem's ring, then along the ring
@@ -661,9 +916,10 @@
         byRing.forEach((slice, ringIdx) => {
             const ring = RINGS[ringIdx];
             const n = slice.length;
-            const offset = ringIdx === 1 ? 360 / (Math.max(n, 1) * 2) : (ringIdx === 2 ? 360 / (Math.max(n, 1) * 4) : 0);
+            const offset = ringIdx === 1 ? 360 / (Math.max(n, 1) * 2) : 0;
             slice.forEach((repo, idx) => {
-                const ang = -90 + offset + idx * 360 / n;
+                // the outer ring lives in the gates: slot by slot, gate by gate
+                const ang = ringIdx === 2 ? gateSlot(idx).ang : -90 + offset + idx * 360 / n;
                 const p = polar(ring.r, ang);
                 const color = langColor(repo.language);
                 const R = ring.size;
@@ -676,8 +932,9 @@
                 counter++;
 
                 svg('circle', { r: R + 8, fill: 'transparent' }, node);                         // bigger hit area
-                svg('circle', { class: 'halo', r: R + 8 }, node);
-                const gem = svg('g', { class: 'gem' }, node);
+                const up = svg('g', { class: 'upright' }, node);                                // counter-turns, so letters stay upright
+                svg('circle', { class: 'halo', r: R + 8 }, up);
+                const gem = svg('g', { class: 'gem' }, up);
                 svg('circle', { class: 'gem-rim', r: R + 2.5, fill: '#04060a', stroke: '#c9d3e0', 'stroke-opacity': 0.4, 'stroke-width': 1 }, gem);
                 svg('circle', { r: R, fill: color }, gem);
                 svg('circle', { r: R, fill: 'url(#gloss)', opacity: 0.62 }, gem);
@@ -687,10 +944,10 @@
                 }, gem);
                 t.textContent = (repo.name.charAt(0) || '?').toUpperCase();
                 svg('circle', { class: 'glint', cx: -R * 0.38, cy: -R * 0.42, r: 2.4, style: '--tw:' + ((counter * 0.37) % 4.5).toFixed(2) + 's' }, gem);
-                svg('circle', { class: 'orbit', r: R + 12 }, node);
-                svg('circle', { class: 'badge', cx: R * 0.78, cy: -R * 0.78, r: 4.5, fill: '#4fd6ff', stroke: '#ffffff', 'stroke-width': 1.2 }, node);
+                svg('circle', { class: 'orbit', r: R + 12 }, up);
+                svg('circle', { class: 'badge', cx: R * 0.78, cy: -R * 0.78, r: 4.5, fill: '#4fd6ff', stroke: '#ffffff', 'stroke-width': 1.2 }, up);
 
-                const item = { kind: 'repo', repo, el: node, ring: ringIdx, idx, ang, x: p.x, y: p.y, parent: null, link: null };
+                const item = { kind: 'repo', repo, el: node, up, ring: ringIdx, idx, ang, x: p.x, y: p.y, parent: null, link: null };
                 state.nodes.push(item);
                 wireNode(item);
             });
@@ -706,6 +963,9 @@
             item.parent = parent;
             item.link = svg('path', { class: 'link', d: linkPath(parent, item) }, el.links);
         });
+
+        buildGates();
+        applyRot(state.rot);
     }
 
     function wireNode(item) {
@@ -772,6 +1032,7 @@
             setTimeout(() => ring.remove(), 1000);
         }
         blip(item.kind === 'hub' ? 520 : 640 + (item.ring || 0) * 90, 0.06, 0.03);
+        bezelWave(item.kind === 'hub' ? null : item.ang);
 
         // swap animation on the panel
         el.detailBody.classList.remove('swap');
@@ -787,19 +1048,62 @@
         if (url) window.open(url, '_blank', 'noopener');
     }
 
-    function moveSeq(dir) {
-        if (!state.items.length) return;
-        const i = state.items.indexOf(state.sel);
-        const next = (i + dir + state.items.length) % state.items.length;
-        select(state.items[next]);
+    /* ---------- turning the wheel ---------- */
+    // everything that is part of the disc turns together; gems turn back so their letters stay upright
+    function applyRot(a) {
+        const t = 'rotate(' + a.toFixed(2) + ' ' + CX + ' ' + CY + ')';
+        [el.gates, el.links, el.nodes, state.fx, state.ringSpin].forEach((g) => { if (g) g.setAttribute('transform', t); });
+        const u = 'rotate(' + (-a).toFixed(2) + ')';
+        state.nodes.forEach((n) => n.up.setAttribute('transform', u));
     }
 
+    let rotRaf = 0;
+    function rotateBy(delta) {
+        state.rotTarget += delta;
+        if (reduceMotion) { state.rot = state.rotTarget; applyRot(state.rot); return; }
+        const root = el.rails.ownerSVGElement;
+        const from = state.rot, to = state.rotTarget, t0 = performance.now(), dur = 600;
+        const ease = (p) => { const c1 = 1.1, c3 = c1 + 1; return 1 + c3 * Math.pow(p - 1, 3) + c1 * Math.pow(p - 1, 2); };   // slight overshoot, then settles
+        cancelAnimationFrame(rotRaf);
+        root.classList.add('spinning');
+        (function step(now) {
+            const p = Math.min((now - t0) / dur, 1);
+            state.rot = from + (to - from) * ease(p);
+            applyRot(state.rot);
+            if (p < 1) rotRaf = requestAnimationFrame(step);
+            else root.classList.remove('spinning');
+        })(t0);
+    }
+
+    // the gem that is nearest to the top of the screen right now, within one ring
+    function nearestTop(list) {
+        return list.reduce((best, c) => (angDiff(c.ang + state.rot, -90) < angDiff(best.ang + state.rot, -90) ? c : best), list[0]);
+    }
+
+    // Left / Right: spin the ring this gem is on. The hub is the middle, not part of the ring.
+    function moveSeq(dir) {
+        const cur = state.sel;
+        if (!cur) return;
+        if (cur.kind === 'hub') {
+            const first = state.nodes.filter((n) => n.ring === 0);
+            if (first.length) select(nearestTop(first));
+            return;
+        }
+        const list = state.nodes.filter((n) => n.ring === cur.ring);
+        if (list.length < 2) return;
+        const next = list[(list.indexOf(cur) + dir + list.length) % list.length];
+        const step = ((next.ang - cur.ang) % 360 + 540) % 360 - 180;        // shortest way round, clockwise = positive
+        rotateBy(-step);                                                    // the new gem slides into the old gem's place
+        select(next);
+    }
+
+    // Up / Down: move between rings (up from the inner ring = the hub)
     function moveRing(dir) {
         const cur = state.sel;
         if (!cur) return;
         const ringList = (r) => state.nodes.filter((n) => n.ring === r);
         if (cur.kind === 'hub') {
-            if (dir > 0 && ringList(0).length) select(ringList(0)[0]);
+            if (dir > 0 && ringList(0).length) select(nearestTop(ringList(0)));
             return;
         }
         const target = cur.ring + dir;
@@ -814,15 +1118,28 @@
         el.shotFallback.style.setProperty('--lang', opts.color);
         el.shotInitial.textContent = opts.initial;
         el.shotNote.textContent = opts.note || '';
+
+        // the picture is shown whole (object-fit: contain). A blurred copy of it fills the gaps,
+        // so wide, tall or tiny pictures all look right. .has-img switches the letter fallback off.
+        const show = () => {
+            el.shotImg.hidden = false;
+            el.shot.classList.add('has-img');
+            el.shot.style.setProperty('--shot-bg', 'url(' + JSON.stringify(opts.src) + ')');
+        };
+        const hide = () => {
+            el.shotImg.hidden = true;
+            el.shot.classList.remove('has-img');
+        };
+
         if (opts.src) {
             el.shotImg.referrerPolicy = 'no-referrer';
-            el.shotImg.onerror = () => { el.shotImg.hidden = true; el.shotNote.textContent = 'Image could not be loaded'; };
-            el.shotImg.onload = () => { el.shotImg.hidden = false; };
-            if (el.shotImg.getAttribute('src') !== opts.src) { el.shotImg.hidden = true; el.shotImg.src = opts.src; }
-            else el.shotImg.hidden = false;
+            el.shotImg.onerror = () => { hide(); el.shotNote.textContent = 'Image could not be loaded'; };
+            el.shotImg.onload = show;
+            if (el.shotImg.getAttribute('src') !== opts.src) { hide(); el.shotImg.src = opts.src; }
+            else show();
         } else {
             el.shotImg.onerror = el.shotImg.onload = null;
-            el.shotImg.hidden = true;
+            hide();
             el.shotImg.removeAttribute('src');
         }
     }
@@ -843,11 +1160,10 @@
         el.title.textContent = repo.name;
         setShot({
             src: rm.image, color, initial: (repo.name.charAt(0) || '?').toUpperCase(),
-            note: rm.image ? 'Preview from README'
+            note: rm.image ? 'Preview from README \u00b7 click to enlarge'
                 : rm.status === 'loading' || rm.status === 'idle' ? 'Reading README\u2026'
                 : rm.status === 'error' ? 'README failed to load' : 'No picture in README'
         });
-        el.activity.style.setProperty('--v', activityPct(repo.pushed_at) + '%');
 
         const chips = [];
         chips.push('<span class="chip gold" title="' + esc(repo.language || 'No language') + '">' + esc(langShort(repo.language)) + '</span>');
@@ -895,13 +1211,11 @@
         el.title.textContent = u.name || u.login;
         setShot({
             src: CONFIG.HUB_IMAGE || u.avatar_url, color, initial: (u.login.charAt(0) || '?').toUpperCase(),
-            note: 'GitHub profile'
+            note: 'GitHub profile \u00b7 click to enlarge'
         });
-        const lastPush = state.repos.reduce((best, r) => (!best || r.pushed_at > best ? r.pushed_at : best), '');
-        el.activity.style.setProperty('--v', activityPct(lastPush) + '%');
         setChips(['<span class="chip gold" title="Followers">' + esc(fmt(u.followers)) + '</span>']);
 
-        el.text.innerHTML = '<div class="desc">' + esc(u.bio || 'No bio on this profile.') + '</div>' +
+        el.text.innerHTML = '<div class="desc">' + esc(CONFIG.BIO || u.bio || 'No bio on this profile.') + '</div>' +
             '<div class="excerpt">' + esc(fmt(u.public_repos) + ' public repositories' + (u.location ? ' \u00b7 ' + u.location : '')) + '</div>';
         el.meta.innerHTML = '<span><span class="dot" style="--lang:' + color + '"></span>@' + esc(u.login) + '</span>' +
             '<span>\u00b7 joined ' + esc(new Date(u.created_at).getFullYear()) + '</span>' +
@@ -916,7 +1230,7 @@
 
         const pr = profileReadmeRepo();
         if (pr) { renderReadmeView(pr); }
-        else el.readmeScroll.innerHTML = '<div class="md"><p>' + esc(u.bio || '') + '</p><p class="empty">No profile README found.</p></div>';
+        else el.readmeScroll.innerHTML = '<div class="md"><p>' + esc(CONFIG.BIO || u.bio || '') + '</p><p class="empty">No profile README found.</p></div>';
     }
 
     function renderReadmeView(repo) {
@@ -976,7 +1290,30 @@
         setTimeout(() => btn.classList.remove('pressed'), 120);
     }
 
+    // the page fades out, then the home page opens
+    function goBack() {
+        document.body.style.transition = 'opacity 0.35s ease';
+        document.body.style.opacity = '0';
+        setTimeout(() => { window.location.href = el.backBtn.getAttribute('href') || 'homepage.html'; }, reduceMotion ? 0 : 350);
+    }
+    window.addEventListener('pageshow', () => { document.body.style.opacity = '1'; });
+
+    // click the preview picture to see it full size
+    function openLightbox() {
+        if (!el.shot.classList.contains('has-img') || !el.shotImg.getAttribute('src')) return;
+        el.lightboxImg.src = el.shotImg.getAttribute('src');
+        el.lightbox.hidden = false;
+        blip(700, 0.05, 0.03);
+    }
+    function closeLightbox() {
+        el.lightbox.hidden = true;
+        el.lightboxImg.removeAttribute('src');
+    }
+
     function bindControls() {
+        el.backBtn.addEventListener('click', (e) => { e.preventDefault(); goBack(); });
+        el.shot.addEventListener('click', openLightbox);
+        el.lightbox.addEventListener('click', closeLightbox);
         el.keyLeft.addEventListener('click', () => moveSeq(-1));
         el.keyRight.addEventListener('click', () => moveSeq(1));
         el.keyUp.addEventListener('click', () => moveRing(-1));
@@ -1000,6 +1337,15 @@
             if (e.ctrlKey || e.metaKey || e.altKey) return;
             const key = e.key;
 
+            // while the big picture is open, Esc / Q / Enter / Space close it and nothing else happens
+            if (!el.lightbox.hidden) {
+                if (key === 'Escape' || key === 'q' || key === 'Q' || key === 'Backspace' || key === 'Enter' || key === ' ') {
+                    e.preventDefault();
+                    closeLightbox();
+                }
+                return;
+            }
+
             // Enter / Space on a real button or link keeps its normal behaviour
             if ((key === 'Enter' || key === ' ') && e.target.closest && e.target.closest('button, a')) return;
 
@@ -1015,6 +1361,7 @@
                     pulse(el.backBtn.querySelector('.key'));
                     el.backBtn.click();            // lets any page-transition script on the link do its job
                     break;
+                case 'r': case 'R': refreshData(); break;
                 default: break;
             }
         });
@@ -1077,20 +1424,3 @@
     init();
 
 })();
-document.addEventListener('keydown', (e) => {
-    const k = e.key.toLowerCase();
-    if (k === 'q' || k === 'escape') {
-        document.body.style.transition = 'opacity 0.35s ease';
-        document.body.style.opacity = '1'; // Ensure baseline
-
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                document.body.style.opacity = '0';
-            });
-        });
-
-        setTimeout(() => { 
-            window.location.href = 'homepage.html'; 
-        }, reduceMotion ? 0 : 350);
-    }
-});
