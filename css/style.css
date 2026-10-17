@@ -1,6 +1,6 @@
 @font-face {
     font-family: 'Edo SZ';
-    src: url('edosz.ttf') format('truetype');
+    src: url('../assets/edosz.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
 }
@@ -27,7 +27,7 @@ body::before {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-image: url('dragonfish.jpg');
+    background-image: url('../images/dragonfish.jpg');
     background-size: cover; /* Ensures it fills the screen without squishing */
     background-position: center;
     background-repeat: no-repeat;

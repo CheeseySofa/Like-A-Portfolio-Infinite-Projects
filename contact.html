@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact | Like A Portfolio: Infinite Projects</title>
+    <!-- style.css = shared look (fonts, fog, sparks, dragon). contact.css = this page only -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/contact.css">
+</head>
+<body class="contact-page">
+    <!-- the icons used on this page (plain line icons, reused below) -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+        <symbol id="i-insta" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="0.8"/></symbol>
+        <symbol id="i-branch" viewBox="0 0 24 24"><circle cx="6" cy="5" r="2.2"/><circle cx="6" cy="19" r="2.2"/><circle cx="18" cy="9" r="2.2"/><path d="M6 7.2v9.6M18 11.2c0 4-6 3-12 5.6"/></symbol>
+        <symbol id="i-phone" viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></symbol>
+        <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></symbol>
+        <symbol id="i-open" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
+    </svg>
+
+    <!-- Shared background effects (same as the other pages) -->
+    <div class="bg-rays"></div>
+    <div class="bg-pattern"></div>
+
+    <div class="fog-container">
+        <div class="fog fog-1"></div>
+        <div class="fog fog-2"></div>
+        <div class="fog fog-3"></div>
+        <div class="fog fog-4"></div>
+        <div class="fog fog-5"></div>
+    </div>
+
+    <div class="sparks-container">
+        <div class="spark spark-1"></div>
+        <div class="spark spark-2"></div>
+        <div class="spark spark-3"></div>
+        <div class="spark spark-4"></div>
+        <div class="spark spark-5"></div>
+        <div class="spark spark-6"></div>
+        <div class="spark spark-7"></div>
+        <div class="spark spark-8"></div>
+    </div>
+
+    <!-- HEADER (top-left banner) -->
+    <header class="page-header">
+        <svg class="header-icon" viewBox="0 0 100 100" aria-hidden="true">
+            <polygon points="36.35,6.82 58.36,29.15 88.27,19.76 73.83,47.59 92,73.14 61.07,68.01 42.39,93.18 37.71,62.18 8,52.19 36.03,38.17"/>
+        </svg>
+        <h1 class="header-title">Contact</h1>
+        <span class="header-jp">連絡</span>
+    </header>
+
+    <main class="wrap">
+        <section class="intro">
+            <h2 class="intro-title" style="text-align: center;">Get in touch</h2>
+        </section>
+
+        <!-- scrolling display (decoration only; the text is repeated twice so the loop is seamless) -->
+        <div class="ticker" aria-hidden="true">
+            <div class="ticker-track">
+                <span>CONTACT</span><span class="sep">&#9670;</span><span>お問い合わせ</span><span class="sep">&#9670;</span><span>GET IN TOUCH</span><span class="sep">&#9670;</span><span>連絡お待ちしております</span><span class="sep">&#9670;</span>
+                <span>CONTACT</span><span class="sep">&#9670;</span><span>お問い合わせ</span><span class="sep">&#9670;</span><span>GET IN TOUCH</span><span class="sep">&#9670;</span><span>連絡お待ちしております</span><span class="sep">&#9670;</span>
+            </div>
+        </div>
+
+        <div class="grid">
+            <!-- LEFT: the three places to find me. Values come from contact.js (empty = "Not added yet"). -->
+            <div class="col col-left">
+                <section class="panel reach" aria-labelledby="reachHead">
+                    <div class="panel-head"><h3 id="reachHead">Find me</h3></div>
+                    <ul class="reach-list" id="reachList">
+                        <li class="reach-row" data-key="instagram">
+                            <span class="r-icon"><svg class="ico" aria-hidden="true"><use href="#i-insta"/></svg></span>
+                            <span class="r-text"><span class="r-label">Instagram</span><span class="r-value empty">Not added yet</span></span>
+                            <span class="r-actions">
+                                <button class="mini" type="button" data-act="copy" aria-label="Copy Instagram link"><svg class="ico" aria-hidden="true"><use href="#i-copy"/></svg></button>
+                                <a class="mini" href="#" target="_blank" rel="noopener" data-act="open" aria-label="Open Instagram"><svg class="ico" aria-hidden="true"><use href="#i-open"/></svg></a>
+                            </span>
+                        </li>
+                        <li class="reach-row" data-key="github">
+                            <span class="r-icon"><svg class="ico" aria-hidden="true"><use href="#i-branch"/></svg></span>
+                            <span class="r-text"><span class="r-label">GitHub</span><span class="r-value empty">Not added yet</span></span>
+                            <span class="r-actions">
+                                <button class="mini" type="button" data-act="copy" aria-label="Copy GitHub link"><svg class="ico" aria-hidden="true"><use href="#i-copy"/></svg></button>
+                                <a class="mini" href="#" target="_blank" rel="noopener" data-act="open" aria-label="Open GitHub"><svg class="ico" aria-hidden="true"><use href="#i-open"/></svg></a>
+                            </span>
+                        </li>
+                        <li class="reach-row" data-key="phone">
+                            <span class="r-icon"><svg class="ico" aria-hidden="true"><use href="#i-phone"/></svg></span>
+                            <span class="r-text"><span class="r-label">Phone</span><span class="r-value empty">Not added yet</span></span>
+                            <span class="r-actions">
+                                <button class="mini" type="button" data-act="copy" aria-label="Copy phone number"><svg class="ico" aria-hidden="true"><use href="#i-copy"/></svg></button>
+                                <a class="mini" href="#" data-act="open" aria-label="Call"><svg class="ico" aria-hidden="true"><use href="#i-open"/></svg></a>
+                            </span>
+                        </li>
+                    </ul>
+                </section>
+
+                <!-- stays hidden until at least one answer is filled in (contact.js, FAQ) -->
+                <section class="panel faq" id="faqPanel" aria-labelledby="faqHead" hidden>
+                    <div class="panel-head"><h3 id="faqHead">Before you write</h3></div>
+                    <div id="faqList"></div>
+                </section>
+            </div>
+
+            <!-- RIGHT: the message form -->
+            <div class="col col-right">
+                <form class="panel slip" id="form" novalidate>
+                    <div class="slip-head">
+                        <h3>Send a message</h3>
+                        <p>Your email is only used to reply to you.</p>
+                    </div>
+
+                    <div class="two">
+                        <div class="field">
+                            <label for="fName">Your name</label>
+                            <input id="fName" name="name" type="text" autocomplete="name" maxlength="80" aria-describedby="eName">
+                            <p class="err" id="eName" role="alert"></p>
+                        </div>
+                        <div class="field">
+                            <label for="fEmail">Your email</label>
+                            <input id="fEmail" name="email" type="email" autocomplete="email" maxlength="120" aria-describedby="eEmail">
+                            <p class="err" id="eEmail" role="alert"></p>
+                        </div>
+                    </div>
+
+                    <fieldset class="field topics">
+                        <legend>What is it about? <span class="opt">(optional)</span></legend>
+                        <div class="chips" id="topics">
+                            <label class="topic"><input type="radio" name="topic" value="Project"><span>A project</span></label>
+                            <label class="topic"><input type="radio" name="topic" value="Collaboration"><span>Collaboration</span></label>
+                            <label class="topic"><input type="radio" name="topic" value="Job"><span>A job</span></label>
+                            <label class="topic"><input type="radio" name="topic" value="Hello"><span>Just saying hi</span></label>
+                        </div>
+                    </fieldset>
+
+                    <div class="field">
+                        <label for="fMsg">Message</label>
+                        <textarea id="fMsg" name="message" rows="5" maxlength="1000" aria-describedby="eMsg count"></textarea>
+                        <div class="msg-foot">
+                            <p class="err" id="eMsg" role="alert"></p>
+                            <span class="counter" id="count">0 / 1000</span>
+                        </div>
+                    </div>
+
+                    <!-- spam trap: people never see this, bots fill it in -->
+                    <div class="hp" aria-hidden="true">
+                        <label>Leave this empty <input type="text" name="website" id="fHp" tabindex="-1" autocomplete="off"></label>
+                    </div>
+
+                    <div class="slip-actions">
+                        <button type="submit" class="send" id="sendBtn">
+                            <span class="send-label">Send message</span>
+                            <span class="send-spin" aria-hidden="true"></span>
+                        </button>
+                        <p class="send-tip">Ctrl + Enter also sends</p>
+                    </div>
+
+                    <div class="result" id="result" role="status" aria-live="polite" hidden></div>
+
+                    <!-- the hanko stamp that lands on the slip when a message really went out -->
+                    <div class="stamp" id="stamp" aria-hidden="true"><span>送信済</span></div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <!-- BOTTOM BAR -->
+    <footer class="hint-bar">
+        <span class="hint">
+            <button class="key" id="keyUp" type="button" aria-label="Previous">&uarr;</button>
+            <button class="key" id="keyDown" type="button" aria-label="Next">&darr;</button>
+            Select
+        </span>
+        <span class="hint">
+            <button class="key" id="keyCopy" type="button" aria-label="Copy the selected one">C</button>
+            Copy
+        </span>
+        <span class="spacer"></span>
+        <a class="hint back" id="backBtn" href="homepage.html"><kbd class="key key-wide" aria-hidden="true">Esc</kbd> Back</a>
+    </footer>
+
+    <script src="js/contact.js"></script>
+</body>
+</html>

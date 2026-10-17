@@ -1,5 +1,5 @@
 /* =====================================================================
-   about.js - everything that makes the About page interactive.
+   skills.js - everything that makes the Skills page interactive.
    1. DATA      : edit the ROLES object to change what each role shows
    2. HELPERS   : small utilities
    3. SELECTING : what happens when a role is picked
@@ -29,7 +29,7 @@ const ROLES = {
     developer: {
         label: 'Developer',
         title: 'Self-Taught Builder',
-        image: '',
+        image: 'imgs/key.png',
         desc: 'All brain. Tinkering with microcontrollers since age 12, building games and gadgets, and working the logic out from scratch.',
         stats: [['Brain', 5], ['Strength', 1], ['Stamina', 3], ['Focus', 5], ['Rhythm', 2], ['Speed', 3]],
         status: [['Level', 19], ['Started at', 'Age 12'], ['Awards', 'Science (multiple)'], ['Weapons', 'Python / C# / ESP32']]
@@ -37,7 +37,7 @@ const ROLES = {
     drummer: {
         label: 'Drummer',
         title: 'Rhythm Keeper',
-        image: '',
+        image: 'imgs/drum.png',
         desc: 'All rhythm. Loves jamming to favourite songs and can identify beats on the go!',
         stats: [['Brain', 3], ['Strength', 3], ['Stamina', 4], ['Focus', 4], ['Rhythm', 5], ['Speed', 4]],
         status: [['Level', 19], ['Class', 'Percussionist'], ['Weapon', 'Drum sticks'], ['Special', 'Tight fills']]
@@ -45,7 +45,7 @@ const ROLES = {
     lifter: {
         label: 'Lifter',
         title: 'Gym Regular',
-        image: '',
+        image: 'imgs/hand.png',
         desc: 'All strength. Trains with discipline and fun in the gym, loves going for more weights!',
         stats: [['Brain', 2], ['Strength', 5], ['Stamina', 4], ['Focus', 4], ['Rhythm', 2], ['Speed', 2]],
         status: [['Level', 19], ['Class', 'Gym regular'], ['Weapon', 'Barbell'], ['Special', 'Progressive overload']]
@@ -53,7 +53,7 @@ const ROLES = {
     hotwheels: {
         label: 'Hot Wheels',
         title: 'Car Collector / Car Lover',
-        image: '',
+        image: 'imgs/car.png',
         desc: 'All speed. Hunts down die-cast cars, loves the details, and knows what makes a good one fast.',
         stats: [['Brain', 3], ['Strength', 1], ['Stamina', 2], ['Focus', 4], ['Rhythm', 1], ['Speed', 5]],
         status: [['Level', 19], ['Class', 'Collector'], ['Weapon', 'Die-cast cars'], ['Special', 'Track builder']]

@@ -6,7 +6,7 @@
 
 // Pages that actually exist. Add 'projects', 'skills', 'contact' here
 // as you build them. Buttons for pages not in this list just shake.
-const PAGES_READY = ['about',"projects"];
+const PAGES_READY = ['skills',"projects","contact"];
 
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 

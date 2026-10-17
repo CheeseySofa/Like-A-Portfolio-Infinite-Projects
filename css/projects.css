@@ -28,7 +28,7 @@ body.projects-page {
 
 /* faint dragon, slid left so it sits behind the wheel */
 body.projects-page::before {
-    background: url('sotenbori.jpeg') no-repeat 0 0 / 100% auto;
+    background: url('../images/sotenbori.jpeg') no-repeat 0 0 / 100% auto;
     opacity: 0.3;
 }
 

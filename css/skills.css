@@ -1,10 +1,10 @@
 /* =====================================================================
-   ABOUT PAGE  (loads after style.css, so it can override it)
+   SKILLS PAGE  (loads after style.css, so it can override it)
    Style reference: the "Check Jobs" screen - dark panels, gold highlight,
    blue info box, big character in the middle, gold slash on the right.
    ===================================================================== */
 
-body.about-page {
+body.skills-page {
     font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
     --gold: #f2c81c;
     --gold-hi: #ffe45a;
@@ -12,8 +12,8 @@ body.about-page {
 }
 
 /* The faint dragon from the home page: slid right so it sits behind the character */
-body.about-page::before {
-    background-image: url('dragonfish.png');
+body.skills-page::before {
+    background-image: url('../images/dragonfish.png');
     width: 100vw;
     height: 100vh;
     left: 25%;
@@ -104,7 +104,7 @@ body.about-page::before {
     align-items: flex-end;
     justify-content: center;
     transform-origin: 50% 100%;
-    /* --px / --py (-0.5 .. 0.5) are set by about.js from the mouse position */
+    /* --px / --py (-0.5 .. 0.5) are set by skills.js from the mouse position */
     transform:
         translate(calc(var(--px, 0) * -26px), calc(var(--py, 0) * -12px))
         rotate(calc(var(--px, 0) * 1.6deg));
