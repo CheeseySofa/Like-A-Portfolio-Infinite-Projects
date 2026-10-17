@@ -4,5 +4,5 @@
 
 A simple portfolio website that I made using purely AI.
 I was against AI in all directions, but then again,
-We have to adapt the technology of the future,
+We have to adapt to the technology of the future,
 So i got into vibe coding by this website.
