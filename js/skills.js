@@ -32,7 +32,7 @@ const ROLES = {
         image: 'imgs/key.png',
         desc: 'All brain. Tinkering with microcontrollers since age 12, building games and gadgets, and working the logic out from scratch.',
         stats: [['Brain', 5], ['Strength', 1], ['Stamina', 3], ['Focus', 5], ['Rhythm', 2], ['Speed', 3]],
-        status: [['Level', 19], ['Started at', 'Age 12'], ['Awards', 'Science (multiple)'], ['Weapons', 'Python / C# / ESP32']]
+        status: [['Level', 16], ['Started at', 'Age 12'], ['Awards', 'School Science Awards (4), qualified for many state level competitions'], ['Weapons', 'Python / C# / ESP32']]
     },
     drummer: {
         label: 'Drummer',

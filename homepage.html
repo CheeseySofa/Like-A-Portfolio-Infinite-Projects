@@ -5,11 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Like A Portfolio: Infinite Projects</title>
     <link rel="stylesheet" href="css/style.css">
+    <!-- page transition: must stay in the <head> -->
+    <script src="js/nav.js"></script>
 </head>
 <body>
     <!-- Animated background elements -->
     <div class="bg-rays"></div>
     <div class="bg-pattern"></div>
+    <div class="bg-vignette"></div>
+    <div class="bg-beam"></div>
 
     <!-- Subtle fog at the very bottom -->
     <div class="fog-container">
@@ -127,7 +131,36 @@
         </div>
     </nav>
 
+    <!-- Vertical neon street signs, left and right (decoration only) -->
+    <div class="sign sign-left" aria-hidden="true"><span>作品集</span></div>
+    <div class="sign sign-right" aria-hidden="true"><span>無限</span></div>
+
+    <!-- HUD, top left: the current objective -->
+    <div class="objective" aria-hidden="true">
+        <span class="obj-tag"><b>OBJECTIVE</b><em>目的</em></span>
+        <span class="obj-text"><i></i>Choose where to go</span>
+    </div>
+
+<!-- Help line: describes whichever diamond you point at (script.js fills it in) -->
+    <div class="help-text" id="helpText" aria-live="polite">Select a destination.</div>
+
+    <!-- HUD, top right: where you are + the time (the clock is filled in by script.js) -->
+    <div class="hud-top" aria-hidden="true">
+        <div class="hud-area"><span class="hud-en">HOME</span><span class="hud-jp">ホーム</span></div>
+        <div class="hud-time" id="hudTime">&nbsp;</div>
+    </div>
+
+    <!-- Key hints, bottom (same bar as the other pages) -->
+    <footer class="hint-bar">
+        <span class="hint">
+            <kbd class="key">&uarr;</kbd><kbd class="key">&larr;</kbd><kbd class="key">&darr;</kbd><kbd class="key">&rarr;</kbd>
+            Select
+        </span>
+        <span class="hint"><kbd class="key key-wide">Enter</kbd> Open</span>
+        <span class="spacer"></span>
+        <span class="hint"><kbd class="key">F</kbd> Fullscreen</span>
+    </footer>
+
     <script src="js/script.js"></script>
-    <script src="js/nav.js"></script>
 </body>
 </html>
